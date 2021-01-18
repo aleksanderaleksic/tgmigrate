@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/aleksanderaleksic/tgmigrate/command"
 	"github.com/urfave/cli/v2"
 )
 
@@ -20,6 +21,10 @@ func main() {
 				Aliases: []string{"c"},
 				Usage:   "Load configuration from `FILE`",
 			},
+		},
+		Commands: []*cli.Command{
+			&command.ApplyCommand,
+			&command.PlanCommand,
 		},
 	}
 
