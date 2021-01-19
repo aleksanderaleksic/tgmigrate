@@ -1,6 +1,11 @@
 package command
 
-import "github.com/urfave/cli/v2"
+import (
+	"fmt"
+	"github.com/aleksanderaleksic/tgmigrate/migration"
+	"github.com/urfave/cli/v2"
+	"io/ioutil"
+)
 
 var ApplyCommand = cli.Command{
 	Name:                   "apply",
@@ -27,5 +32,18 @@ var ApplyCommand = cli.Command{
 }
 
 func applyCommandAction(c *cli.Context) error  {
+
+	var filename = "./example/migrations/20200118_test.hcl"
+	source, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	file, err := migration.ParseMigrationFile(filename,source)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(file)
+
 	return nil
 }
