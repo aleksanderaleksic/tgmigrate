@@ -7,15 +7,13 @@ import (
 
 type JSONTime time.Time
 
-const dateTimeFormat = `"` + time.RFC3339 + `"`
-
 func (t JSONTime) MarshalJSON() ([]byte, error) {
-	stamp := fmt.Sprintf("\"%s\"", time.Time(t).Format(dateTimeFormat))
+	stamp := fmt.Sprintf("\"%s\"", time.Time(t).Format(time.RFC3339))
 	return []byte(stamp), nil
 }
 
 func (t *JSONTime) UnmarshalJSON(value []byte) error {
-	ti, err := time.Parse(dateTimeFormat, string(value))
+	ti, err := time.Parse(`"`+time.RFC3339+`"`, string(value))
 	if err != nil {
 		return err
 	}

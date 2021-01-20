@@ -60,6 +60,9 @@ func (h LocalHistory) getHistoryPath() string {
 func (h LocalHistory) writeStorageHistory(storageHistory StorageHistory) error {
 	historyStoragePath := h.getHistoryPath()
 	encodedStorageHistory, err := EncodeStorageHistory(storageHistory)
+	if err != nil {
+		return err
+	}
 	err = ioutil.WriteFile(historyStoragePath, encodedStorageHistory, 0777)
 	if err != nil {
 		return fmt.Errorf("failed to write history to '%s' err: %s", historyStoragePath, err)
