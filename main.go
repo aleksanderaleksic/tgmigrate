@@ -47,6 +47,9 @@ func main() {
 			return nil
 		},
 		After: func(context *cli.Context) error {
+			if globalRunner.StateInterface == nil {
+				return nil
+			}
 			return globalRunner.StateInterface.Complete()
 		},
 		Commands: []*cli.Command{
