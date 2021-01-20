@@ -2,8 +2,8 @@ package history
 
 import (
 	"fmt"
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
-	"github.com/aleksanderaleksic/tgmigrate/tools"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -28,7 +28,7 @@ func (h *LocalHistory) InitializeStorage(skipUserInteraction bool) (*StorageHist
 	historyStoragePath := h.getHistoryPath()
 	if _, err := os.Stat(historyStoragePath); os.IsNotExist(err) {
 		fmt.Printf("Migration history not found at '%s', do you want to create a new history on this location?\n", historyStoragePath)
-		if !skipUserInteraction && !tools.AskUserToConfirm() {
+		if !skipUserInteraction && !common.AskUserToConfirm() {
 			os.Exit(0)
 			return nil, nil
 		}
@@ -84,7 +84,7 @@ func (h LocalHistory) readStorageHistory() (*StorageHistory, error) {
 func (h *LocalHistory) StoreMigrationObject(migrationName string, result Result, fileHash string) {
 	h.StorageHistory.AppliedMigration = append(h.StorageHistory.AppliedMigration, StorageHistoryObject{
 		SchemaVersion: StorageHistoryObjectVersion,
-		Applied:       JSONTime(time.Now()),
+		Applied:       common.JSONTime(time.Now()),
 		Hash:          fileHash,
 		Name:          migrationName,
 		Result:        result,
