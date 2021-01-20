@@ -15,9 +15,9 @@ type LocalHistory struct {
 	StorageHistory     *StorageHistory
 }
 
-func (h LocalHistory) IsMigrationApplied(migrationName string) (*Result, error) {
+func (h LocalHistory) IsMigrationApplied(hash string) (*Result, error) {
 	for _, m := range h.StorageHistory.AppliedMigration {
-		if m.Name == migrationName {
+		if m.Hash == hash {
 			return &m.Result, nil
 		}
 	}

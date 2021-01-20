@@ -6,7 +6,7 @@ import (
 )
 
 type History interface {
-	IsMigrationApplied(migrationName string) (*Result, error)
+	IsMigrationApplied(hash string) (*Result, error)
 	InitializeStorage(skipUserInteraction bool) (*StorageHistory, error)
 	StoreMigrationObject(migrationName string, result Result, fileHash string)
 	WriteToStorage() error

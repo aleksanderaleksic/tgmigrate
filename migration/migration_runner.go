@@ -103,7 +103,7 @@ func (r Runner) getMigrationsToBeApplied() (*[]File, error) {
 	var migrationsToBeApplied []File
 
 	for _, migration := range r.MigrationFiles {
-		historyResult, err := r.HistoryInterface.IsMigrationApplied(migration.Metadata.FileName)
+		historyResult, err := r.HistoryInterface.IsMigrationApplied(migration.Metadata.FileHash)
 		if err != nil {
 			return nil, err
 		}

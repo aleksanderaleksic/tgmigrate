@@ -8,7 +8,7 @@ type S3History struct {
 	S3StorageConfig config.S3HistoryStorageConfig
 }
 
-func (h S3History) IsMigrationApplied(migrationName string) (*Result, error) {
+func (h S3History) IsMigrationApplied(hash string) (*Result, error) {
 	r := Result{State: ResultStateUnapplied}
 	return &r, nil
 }
