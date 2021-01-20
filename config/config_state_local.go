@@ -26,7 +26,7 @@ func (l LocalStateConfig) GetStateDirectory() string {
 	return l.Directory
 }
 
-func (l LocalStateConfig) GetBackupStateDirectory() string {
+func (l *LocalStateConfig) GetBackupStateDirectory() string {
 	if l.BackupStateDirectory != nil {
 		return *l.BackupStateDirectory
 	}

@@ -32,7 +32,7 @@ func (s *S3StateConfig) GetStateDirectory() string {
 	return *s.LocalDirectory
 }
 
-func (s S3StateConfig) GetBackupStateDirectory() string {
+func (s *S3StateConfig) GetBackupStateDirectory() string {
 	if s.BackupStateDirectory != nil {
 		return *s.BackupStateDirectory
 	}
