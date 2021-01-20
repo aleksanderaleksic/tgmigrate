@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type LocalHistory struct {
@@ -83,6 +84,7 @@ func (h LocalHistory) readStorageHistory() (*StorageHistory, error) {
 func (h *LocalHistory) StoreMigrationObject(migrationName string, result Result, fileHash string) {
 	h.StorageHistory.AppliedMigration = append(h.StorageHistory.AppliedMigration, StorageHistoryObject{
 		SchemaVersion: StorageHistoryObjectVersion,
+		Applied:       JSONTime(time.Now()),
 		Hash:          fileHash,
 		Name:          migrationName,
 		Result:        result,
