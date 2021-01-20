@@ -3,7 +3,12 @@ package migration
 import (
 	"crypto/sha256"
 	"fmt"
+	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/hcl/v2/hclsimple"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type FileContent struct {
@@ -17,7 +22,43 @@ type File struct {
 	Migrations []Migration
 }
 
-func ParseMigrationFile(filename string, source []byte) (*File, error) {
+func GetMigrationFiles(cfg config.Config) (*[]File, error) {
+	var migrationFiles []File
+
+	err := filepath.Walk(cfg.AbsoluteMigrationDir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			if !strings.HasSuffix(path, "hcl") {
+				return nil
+			}
+
+			source, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			migrationFile, err := parseMigrationFile(info.Name(), source)
+			if err != nil {
+				return err
+			}
+
+			migrationFiles = append(migrationFiles, *migrationFile)
+
+			return nil
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return &migrationFiles, err
+}
+
+func parseMigrationFile(filename string, source []byte) (*File, error) {
 	fileSha256 := fmt.Sprintf("%x", sha256.Sum256(source))
 
 	var f FileContent
@@ -27,6 +68,7 @@ func ParseMigrationFile(filename string, source []byte) (*File, error) {
 	}
 
 	var fileMeta = FileMetadata{
+		FileName: filename,
 		FileHash: fileSha256,
 	}
 

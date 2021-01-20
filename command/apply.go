@@ -1,16 +1,10 @@
 package command
 
 import (
-	"fmt"
-	"github.com/aleksanderaleksic/tgmigrate/config"
-	"github.com/aleksanderaleksic/tgmigrate/migration"
 	"github.com/urfave/cli/v2"
-	"io/ioutil"
 )
 
-type ApplyCommand struct {
-	Config config.Config
-}
+type ApplyCommand struct{}
 
 func (command ApplyCommand) GetCLICommand() *cli.Command {
 	cmd := cli.Command{
@@ -39,18 +33,16 @@ func (command ApplyCommand) GetCLICommand() *cli.Command {
 	return &cmd
 }
 
-func (command ApplyCommand) run(c *cli.Context) error  {
-	var filename = "./example/migrations/20200118_test.hcl"
-	source, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-	file, err := migration.ParseMigrationFile(filename,source)
+func (command ApplyCommand) run(c *cli.Context) error {
+	runner, err := Initialize(c)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(file)
+	err = runner.Apply()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -1,13 +1,10 @@
 package command
 
 import (
-	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/urfave/cli/v2"
 )
 
-type PlanCommand struct {
-	Config config.Config
-}
+type PlanCommand struct{}
 
 func (command PlanCommand) GetCLICommand() *cli.Command {
 	cmd := cli.Command{
@@ -36,6 +33,6 @@ func (command PlanCommand) GetCLICommand() *cli.Command {
 	return &cmd
 }
 
-func (command PlanCommand) run(c *cli.Context) error  {
+func (command PlanCommand) run(c *cli.Context) error {
 	return nil
 }

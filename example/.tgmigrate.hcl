@@ -1,9 +1,14 @@
 migration {
-  migration_dir = "./migrations"
+  migration_dir = "migrations"
 
   history {
-    storage "s3" {
-      key = "migrations/history.json"
+    storage "local" {
+      path = "history.json"
     }
+  }
+
+  state "local" {
+    directory = "state"
+    state_file_name = "terraform.tfstate"
   }
 }
