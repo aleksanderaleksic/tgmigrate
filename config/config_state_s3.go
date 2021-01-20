@@ -6,9 +6,10 @@ import (
 )
 
 type S3StateConfig struct {
-	Bucket         string  `hcl:"bucket"`
-	LocalDirectory *string `hcl:"local_directory,optional"`
-	StateFileName  *string `hcl:"state_file_name,optional"`
+	Bucket               string  `hcl:"bucket"`
+	LocalDirectory       *string `hcl:"local_directory,optional"`
+	BackupStateDirectory *string `hcl:"backup_state_directory,optional"`
+	StateFileName        *string `hcl:"state_file_name,optional"`
 }
 
 func ParseS3StateConfig(configFile File) (*S3StateConfig, error) {
@@ -29,6 +30,15 @@ func (s *S3StateConfig) GetStateDirectory() string {
 	tmpDir, _ := ioutil.TempDir("", "tgmigrate")
 	s.LocalDirectory = &tmpDir
 	return *s.LocalDirectory
+}
+
+func (s S3StateConfig) GetBackupStateDirectory() string {
+	if s.BackupStateDirectory != nil {
+		return *s.BackupStateDirectory
+	}
+	path, _ := ioutil.TempDir("", "tgmigrate-state-backup")
+	s.BackupStateDirectory = &path
+	return path
 }
 
 func (s S3StateConfig) GetStateFileName() string {

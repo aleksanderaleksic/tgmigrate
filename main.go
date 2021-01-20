@@ -47,8 +47,7 @@ func main() {
 			return nil
 		},
 		After: func(context *cli.Context) error {
-			globalRunner.StateInterface.Deinitialize()
-			return nil
+			return globalRunner.StateInterface.Complete()
 		},
 		Commands: []*cli.Command{
 			applyCommand.GetCLICommand(),

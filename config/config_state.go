@@ -9,5 +9,6 @@ type State struct {
 
 type StateConfig interface {
 	GetStateDirectory() string
+	GetBackupStateDirectory() string
 	GetStateFileName() string
 }

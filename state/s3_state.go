@@ -5,31 +5,26 @@ import (
 	"fmt"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/terraform-exec/tfexec"
-	"os"
 	"path/filepath"
-	"strings"
 )
 
-type LocalState struct {
+type S3State struct {
 	state     config.State
 	Terraform *tfexec.Terraform
 }
 
-func (s *LocalState) InitializeState() error {
-	tf, err := initializeTerraformExec(s.state)
-	s.Terraform = tf
-	return err
-}
-
-func (s LocalState) Complete() error {
-	os.RemoveAll(filepath.Dir(s.Terraform.ExecPath()))
-	if strings.HasPrefix(s.state.Config.GetStateDirectory(), "/tmp") {
-		os.RemoveAll(filepath.Dir(s.state.Config.GetStateDirectory()))
-	}
+func (s *S3State) InitializeState() error {
+	//TODO download state from s3 bucket to temporary dir
 	return nil
 }
 
-func (s LocalState) Move(from ResourceContext, to ResourceContext) (bool, error) {
+func (s S3State) Complete() error {
+	//TODO upload state to s3 bucket
+	//TODO Remove downloaded state dir from local
+	return nil
+}
+
+func (s S3State) Move(from ResourceContext, to ResourceContext) (bool, error) {
 	fromStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), from.State, s.state.Config.GetStateFileName())
 	toStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), to.State, s.state.Config.GetStateFileName())
 	fromBackupStatePath := filepath.Join(s.state.Config.GetBackupStateDirectory(), from.State, s.backupStateFileName())
@@ -50,7 +45,7 @@ func (s LocalState) Move(from ResourceContext, to ResourceContext) (bool, error)
 	return true, err
 }
 
-func (s LocalState) Remove(resource ResourceContext) (bool, error) {
+func (s S3State) Remove(resource ResourceContext) (bool, error) {
 	stateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), resource.State, s.state.Config.GetStateFileName())
 	backupStatePath := filepath.Join(s.state.Config.GetBackupStateDirectory(), resource.State, s.backupStateFileName())
 
@@ -66,11 +61,11 @@ func (s LocalState) Remove(resource ResourceContext) (bool, error) {
 	return true, err
 }
 
-func (s LocalState) getAbsoluteStateDirPath() string {
+func (s S3State) getAbsoluteStateDirPath() string {
 	path, _ := filepath.Abs(s.state.Config.GetStateDirectory())
 	return path
 }
 
-func (s LocalState) backupStateFileName() string {
+func (s S3State) backupStateFileName() string {
 	return fmt.Sprintf("%s%s", "backup-", s.state.Config.GetStateFileName())
 }

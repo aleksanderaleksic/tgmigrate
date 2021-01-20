@@ -17,7 +17,7 @@ type ResourceContext struct {
 
 type State interface {
 	InitializeState() error
-	Deinitialize()
+	Complete() error
 	Move(from ResourceContext, to ResourceContext) (bool, error)
 	Remove(resource ResourceContext) (bool, error)
 }

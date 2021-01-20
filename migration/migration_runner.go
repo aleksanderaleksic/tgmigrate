@@ -96,7 +96,6 @@ func (r Runner) Apply() error {
 }
 
 func (r Runner) Plan() error {
-	defer r.StateInterface.Deinitialize()
 	return nil
 }
 
