@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"io/ioutil"
-	"os"
 )
 
 type S3StateConfig struct {
@@ -23,13 +22,13 @@ func ParseS3StateConfig(configFile File) (*S3StateConfig, error) {
 	return &config, nil
 }
 
-func (s S3StateConfig) GetStateDirectory() string {
+func (s *S3StateConfig) GetStateDirectory() string {
 	if s.LocalDirectory != nil {
 		return *s.LocalDirectory
 	}
 	tmpDir, _ := ioutil.TempDir("", "tgmigrate")
-	defer os.RemoveAll(tmpDir)
-	return tmpDir
+	s.LocalDirectory = &tmpDir
+	return *s.LocalDirectory
 }
 
 func (s S3StateConfig) GetStateFileName() string {

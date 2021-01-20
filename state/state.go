@@ -17,6 +17,7 @@ type ResourceContext struct {
 
 type State interface {
 	InitializeState() error
+	Deinitialize()
 	Move(from ResourceContext, to ResourceContext) (bool, error)
 	Remove(resource ResourceContext) (bool, error)
 }
@@ -37,7 +38,6 @@ func initializeTerraformExec(stateConfig config.State) (*tfexec.Terraform, error
 	if err != nil {
 		return nil, err
 	}
-	//defer os.RemoveAll(tmpDir)
 	execPath, err := tfinstall.Find(context.Background(), tfinstall.LatestVersion(tmpDir, false))
 	if err != nil {
 		return nil, err

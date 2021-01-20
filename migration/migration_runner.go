@@ -16,6 +16,8 @@ type Runner struct {
 }
 
 func (r Runner) Apply() error {
+	defer r.StateInterface.Deinitialize()
+
 	migrationsToBeApplied, err := r.getMigrationsToBeApplied()
 	if err != nil {
 		return err
@@ -96,6 +98,7 @@ func (r Runner) Apply() error {
 }
 
 func (r Runner) Plan() error {
+	defer r.StateInterface.Deinitialize()
 	return nil
 }
 

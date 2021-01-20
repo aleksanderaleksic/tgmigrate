@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/terraform-exec/tfexec"
+	"os"
 	"path/filepath"
+	"strings"
 )
 
 type LocalState struct {
@@ -16,6 +18,13 @@ func (s *LocalState) InitializeState() error {
 	tf, err := initializeTerraformExec(s.state)
 	s.Terraform = tf
 	return err
+}
+
+func (s LocalState) Deinitialize() {
+	os.RemoveAll(filepath.Dir(s.Terraform.ExecPath()))
+	if strings.HasPrefix(s.state.Config.GetStateDirectory(),"/tmp") {
+		os.RemoveAll(filepath.Dir(s.state.Config.GetStateDirectory()))
+	}
 }
 
 func (s *LocalState) Move(from ResourceContext, to ResourceContext) (bool, error) {
