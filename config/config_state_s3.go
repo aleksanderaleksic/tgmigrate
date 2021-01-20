@@ -6,9 +6,9 @@ import (
 )
 
 type S3StateConfig struct {
-	Bucket string `hcl:"bucket"`
+	Bucket         string  `hcl:"bucket"`
 	LocalDirectory *string `hcl:"local_directory,optional"`
-	StateFileName *string `hcl:"state_file_name,optional"`
+	StateFileName  *string `hcl:"state_file_name,optional"`
 }
 
 func ParseS3StateConfig(configFile File) (*S3StateConfig, error) {

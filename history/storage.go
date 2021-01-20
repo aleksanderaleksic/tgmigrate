@@ -11,7 +11,7 @@ const StorageHistoryObjectVersion = "v1"
 
 type JSONTime time.Time
 
-func (t JSONTime)MarshalJSON() ([]byte, error) {
+func (t JSONTime) MarshalJSON() ([]byte, error) {
 	//do your serializing here
 	stamp := fmt.Sprintf("\"%s\"", time.Time(t).Format("2006-01-02T15:04:05"))
 	return []byte(stamp), nil
@@ -23,11 +23,11 @@ type StorageHistory struct {
 }
 
 type StorageHistoryObject struct {
-	SchemaVersion string `json:"schema_version"`
-	Applied     JSONTime `json:"applied"`
-	Hash          string `json:"hash"`
-	Name          string `json:"name"`
-	Result        Result `json:"result"`
+	SchemaVersion string   `json:"schema_version"`
+	Applied       JSONTime `json:"applied"`
+	Hash          string   `json:"hash"`
+	Name          string   `json:"name"`
+	Result        Result   `json:"result"`
 }
 
 func EmptyStorageHistory() StorageHistory {

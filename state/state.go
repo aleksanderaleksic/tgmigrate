@@ -11,7 +11,7 @@ import (
 )
 
 type ResourceContext struct {
-	State string
+	State    string
 	Resource string
 }
 
@@ -33,7 +33,7 @@ func GetStateInterface(c config.Config) (State, error) {
 	}
 }
 
-func initializeTerraformExec(stateConfig config.State) (*tfexec.Terraform, error){
+func initializeTerraformExec(stateConfig config.State) (*tfexec.Terraform, error) {
 	tmpDir, err := ioutil.TempDir("", "tfinstall")
 	if err != nil {
 		return nil, err

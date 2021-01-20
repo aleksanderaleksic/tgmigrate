@@ -5,7 +5,7 @@ import (
 )
 
 type LocalStateConfig struct {
-	Directory     string `hcl:"directory"`
+	Directory     string  `hcl:"directory"`
 	StateFileName *string `hcl:"state_file_name,optional"`
 }
 

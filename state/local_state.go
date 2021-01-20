@@ -22,7 +22,7 @@ func (s *LocalState) InitializeState() error {
 
 func (s LocalState) Deinitialize() {
 	os.RemoveAll(filepath.Dir(s.Terraform.ExecPath()))
-	if strings.HasPrefix(s.state.Config.GetStateDirectory(),"/tmp") {
+	if strings.HasPrefix(s.state.Config.GetStateDirectory(), "/tmp") {
 		os.RemoveAll(filepath.Dir(s.state.Config.GetStateDirectory()))
 	}
 }

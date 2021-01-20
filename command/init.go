@@ -37,8 +37,6 @@ func Initialize(c *cli.Context) (*migration.Runner, error) {
 		return nil, err
 	}
 
-
-
 	runner := migration.Runner{
 		HistoryInterface: historyInterface,
 		StateInterface:   stateInterface,
@@ -47,5 +45,3 @@ func Initialize(c *cli.Context) (*migration.Runner, error) {
 
 	return &runner, nil
 }
-
-
