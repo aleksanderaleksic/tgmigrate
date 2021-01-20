@@ -1,10 +1,13 @@
 package command
 
 import (
+	"github.com/aleksanderaleksic/tgmigrate/migration"
 	"github.com/urfave/cli/v2"
 )
 
-type ApplyCommand struct{}
+type ApplyCommand struct {
+	Runner *migration.Runner
+}
 
 func (command ApplyCommand) GetCLICommand() *cli.Command {
 	cmd := cli.Command{
@@ -34,15 +37,5 @@ func (command ApplyCommand) GetCLICommand() *cli.Command {
 }
 
 func (command ApplyCommand) run(c *cli.Context) error {
-	runner, err := Initialize(c)
-	if err != nil {
-		return err
-	}
-
-	err = runner.Apply()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return command.Runner.Apply()
 }

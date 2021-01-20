@@ -16,8 +16,6 @@ type Runner struct {
 }
 
 func (r Runner) Apply() error {
-	defer r.StateInterface.Deinitialize()
-
 	migrationsToBeApplied, err := r.getMigrationsToBeApplied()
 	if err != nil {
 		return err

@@ -1,10 +1,13 @@
 package command
 
 import (
+	"github.com/aleksanderaleksic/tgmigrate/migration"
 	"github.com/urfave/cli/v2"
 )
 
-type PlanCommand struct{}
+type PlanCommand struct {
+	Runner *migration.Runner
+}
 
 func (command PlanCommand) GetCLICommand() *cli.Command {
 	cmd := cli.Command{
@@ -34,5 +37,5 @@ func (command PlanCommand) GetCLICommand() *cli.Command {
 }
 
 func (command PlanCommand) run(c *cli.Context) error {
-	return nil
+	return command.Runner.Plan()
 }
