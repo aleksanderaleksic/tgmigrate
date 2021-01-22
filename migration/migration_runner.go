@@ -26,6 +26,11 @@ func (r Runner) Apply() error {
 		return nil
 	}
 
+	err = r.StateInterface.InitializeState()
+	if err != nil {
+		return err
+	}
+
 	for _, migrationFile := range *migrationsToBeApplied {
 		fmt.Printf("Migrations for %s will be applied\n", migrationFile.Metadata.FileName)
 

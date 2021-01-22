@@ -13,7 +13,7 @@ const defaultConfigFile = ".tgmigrate.hcl"
 
 type File struct {
 	Migration struct {
-		MigrationDir string `hcl:"migration_dir"`
+		MigrationDir string `hcl:"migration"`
 		History      struct {
 			Storage struct {
 				Type   string   `hcl:"type,label"`
@@ -102,7 +102,7 @@ func getHistoryStorageConfig(file File) (interface{}, error) {
 }
 
 func getStateConfig(file File) (StateConfig, error) {
-	t := file.Migration.History.Storage.Type
+	t := file.Migration.State.Type
 	switch t {
 	case "local":
 		return ParseLocalStateConfig(file)

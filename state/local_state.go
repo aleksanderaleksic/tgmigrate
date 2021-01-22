@@ -11,29 +11,29 @@ import (
 )
 
 type LocalState struct {
-	state     config.State
+	State     config.State
 	Terraform *tfexec.Terraform
 }
 
 func (s *LocalState) InitializeState() error {
-	tf, err := initializeTerraformExec(s.state)
+	tf, err := initializeTerraformExec(s.State)
 	s.Terraform = tf
 	return err
 }
 
 func (s LocalState) Complete() error {
 	os.RemoveAll(filepath.Dir(s.Terraform.ExecPath()))
-	if strings.HasPrefix(s.state.Config.GetStateDirectory(), "/tmp") {
-		os.RemoveAll(filepath.Dir(s.state.Config.GetStateDirectory()))
+	if strings.HasPrefix(s.State.Config.GetStateDirectory(), "/tmp") {
+		os.RemoveAll(filepath.Dir(s.State.Config.GetStateDirectory()))
 	}
 	return nil
 }
 
 func (s LocalState) Move(from ResourceContext, to ResourceContext) (bool, error) {
-	fromStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), from.State, s.state.Config.GetStateFileName())
-	toStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), to.State, s.state.Config.GetStateFileName())
-	fromBackupStatePath := filepath.Join(s.state.Config.GetBackupStateDirectory(), s.backupStateFileName(from))
-	toBackupStatePath := filepath.Join(s.state.Config.GetBackupStateDirectory(), s.backupStateFileName(to))
+	fromStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), from.State, s.State.Config.GetStateFileName())
+	toStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), to.State, s.State.Config.GetStateFileName())
+	fromBackupStatePath := filepath.Join(s.State.Config.GetBackupStateDirectory(), s.backupStateFileName(from))
+	toBackupStatePath := filepath.Join(s.State.Config.GetBackupStateDirectory(), s.backupStateFileName(to))
 
 	err := s.Terraform.StateMv(
 		context.Background(),
@@ -51,8 +51,8 @@ func (s LocalState) Move(from ResourceContext, to ResourceContext) (bool, error)
 }
 
 func (s LocalState) Remove(resource ResourceContext) (bool, error) {
-	stateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), resource.State, s.state.Config.GetStateFileName())
-	backupStatePath := filepath.Join(s.state.Config.GetBackupStateDirectory(), s.backupStateFileName(resource))
+	stateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), resource.State, s.State.Config.GetStateFileName())
+	backupStatePath := filepath.Join(s.State.Config.GetBackupStateDirectory(), s.backupStateFileName(resource))
 
 	err := s.Terraform.StateRm(
 		context.Background(),
@@ -67,10 +67,10 @@ func (s LocalState) Remove(resource ResourceContext) (bool, error) {
 }
 
 func (s LocalState) getAbsoluteStateDirPath() string {
-	path, _ := filepath.Abs(s.state.Config.GetStateDirectory())
+	path, _ := filepath.Abs(s.State.Config.GetStateDirectory())
 	return path
 }
 
 func (s LocalState) backupStateFileName(resourceContext ResourceContext) string {
-	return fmt.Sprintf("%s-%s", strings.ReplaceAll(resourceContext.State, "/", "-"), s.state.Config.GetStateFileName())
+	return fmt.Sprintf("%s-%s", strings.ReplaceAll(resourceContext.State, "/", "-"), s.State.Config.GetStateFileName())
 }

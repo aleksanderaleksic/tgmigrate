@@ -1,5 +1,5 @@
 migration {
-  migration_dir = "migrations"
+  migration = "./migrations"
 
   history {
     storage "local" {
@@ -7,8 +7,9 @@ migration {
     }
   }
 
-  state "local" {
-    directory = "state"
-    state_file_name = "terraform.tfstate"
+  state "s3" {
+    bucket = "airthings-terraform-states-512741945438"
+    region = "us-east-1"
+    assume_role = "arn:aws:iam::512741945438:role/admin"
   }
 }

@@ -88,10 +88,6 @@ func Initialize(c *cli.Context) (*migration.Runner, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = stateInterface.InitializeState()
-	if err != nil {
-		return nil, err
-	}
 
 	runner := migration.Runner{
 		HistoryInterface: historyInterface,
