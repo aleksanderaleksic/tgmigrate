@@ -59,12 +59,6 @@ func GetStateInterface(c config.Config, ctx common.Context) (State, error) {
 			},
 			Terraform: nil,
 		}, nil
-	case "local":
-		return &LocalState{
-			context:   ctx,
-			State:     c.State,
-			Terraform: nil,
-		}, nil
 	default:
 		return nil, fmt.Errorf("unknown history storage type: %s", c.History.Storage.Type)
 	}

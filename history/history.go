@@ -48,12 +48,6 @@ func GetHistoryInterface(c config.Config, ctx common.Context) (History, error) {
 			S3StorageConfig: *conf,
 			session:         *sess,
 		}, nil
-	case "local":
-		conf := c.History.Storage.Config.(*config.LocalHistoryStorageConfig)
-		return &LocalHistory{
-			context:            ctx,
-			LocalStorageConfig: *conf,
-		}, nil
 	default:
 		return nil, fmt.Errorf("unknown history storage type: %s", c.History.Storage.Type)
 	}

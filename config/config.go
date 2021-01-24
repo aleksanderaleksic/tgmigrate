@@ -92,8 +92,6 @@ func parseConfigFile(filename string, source []byte) (*Config, error) {
 func getHistoryStorageConfig(file File) (interface{}, error) {
 	t := file.Migration.History.Storage.Type
 	switch t {
-	case "local":
-		return ParseLocalHistoryStorageConfig(file)
 	case "s3":
 		return ParseHistoryS3StorageConfig(file)
 	default:
@@ -104,8 +102,6 @@ func getHistoryStorageConfig(file File) (interface{}, error) {
 func getStateConfig(file File) (StateConfig, error) {
 	t := file.Migration.State.Type
 	switch t {
-	case "local":
-		return ParseLocalStateConfig(file)
 	case "s3":
 		return ParseS3StateConfig(file)
 	default:
