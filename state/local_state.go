@@ -1,7 +1,6 @@
 package state
 
 import (
-	"context"
 	"fmt"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/terraform-exec/tfexec"
@@ -23,47 +22,15 @@ func (s *LocalState) InitializeState() error {
 
 func (s LocalState) Complete() error {
 	os.RemoveAll(filepath.Dir(s.Terraform.ExecPath()))
-	if strings.HasPrefix(s.State.Config.GetStateDirectory(), "/tmp") {
-		os.RemoveAll(filepath.Dir(s.State.Config.GetStateDirectory()))
-	}
 	return nil
 }
 
 func (s LocalState) Move(from ResourceContext, to ResourceContext) (bool, error) {
-	fromStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), from.State, s.State.Config.GetStateFileName())
-	toStateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), to.State, s.State.Config.GetStateFileName())
-	fromBackupStatePath := filepath.Join(s.State.Config.GetBackupStateDirectory(), s.backupStateFileName(from))
-	toBackupStatePath := filepath.Join(s.State.Config.GetBackupStateDirectory(), s.backupStateFileName(to))
-
-	err := s.Terraform.StateMv(
-		context.Background(),
-		from.Resource,
-		to.Resource,
-		tfexec.State(fromStateFilePath),
-		tfexec.StateOut(toStateFilePath),
-		tfexec.Backup(fromBackupStatePath),
-		tfexec.BackupOut(toBackupStatePath),
-	)
-	if err != nil {
-		return false, err
-	}
-	return true, err
+	return move(s.Terraform, s.getAbsoluteStateDirPath(), s.State.Config.GetStateFileName(), from, to)
 }
 
 func (s LocalState) Remove(resource ResourceContext) (bool, error) {
-	stateFilePath := filepath.Join(s.getAbsoluteStateDirPath(), resource.State, s.State.Config.GetStateFileName())
-	backupStatePath := filepath.Join(s.State.Config.GetBackupStateDirectory(), s.backupStateFileName(resource))
-
-	err := s.Terraform.StateRm(
-		context.Background(),
-		resource.Resource,
-		tfexec.State(stateFilePath),
-		tfexec.Backup(backupStatePath),
-	)
-	if err != nil {
-		return false, err
-	}
-	return true, err
+	return remove(s.Terraform, s.getAbsoluteStateDirPath(), s.State.Config.GetStateFileName(), resource)
 }
 
 func (s LocalState) getAbsoluteStateDirPath() string {

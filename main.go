@@ -75,16 +75,16 @@ func Initialize(c *cli.Context) (*migration.Runner, error) {
 		return nil, err
 	}
 
-	historyInterface, err := history.GetHistoryInterface(*cfg)
-	if err != nil {
-		return nil, err
-	}
-	_, err = historyInterface.InitializeStorage(c.Bool("y"))
+	stateInterface, err := state.GetStateInterface(*cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stateInterface, err := state.GetStateInterface(*cfg)
+	historyInterface, err := history.GetHistoryInterface(*cfg)
+	if err != nil {
+		return nil, err
+	}
+	_, err = historyInterface.InitializeHistory(c.Bool("y"))
 	if err != nil {
 		return nil, err
 	}

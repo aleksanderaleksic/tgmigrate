@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/hashicorp/hcl/v2/gohcl"
-	"io/ioutil"
+	"os"
 )
 
 type S3StateConfig struct {
@@ -29,18 +29,14 @@ func (s *S3StateConfig) GetStateDirectory() string {
 	if s.stateDirectory != nil {
 		return *s.stateDirectory
 	}
-	path, _ := ioutil.TempDir("", "tgmigrate-state")
-	s.stateDirectory = &path
-	return path
+	dirName := s.Bucket + "_state"
+	s.stateDirectory = &dirName
+	_ = os.Mkdir(dirName, 0777)
+	return *s.stateDirectory
 }
 
 func (s *S3StateConfig) GetBackupStateDirectory() string {
-	if s.backupStateDirectory != nil {
-		return *s.backupStateDirectory
-	}
-	path, _ := ioutil.TempDir("", "tgmigrate-state-backup")
-	s.backupStateDirectory = &path
-	return path
+	return s.GetStateDirectory()
 }
 
 func (s S3StateConfig) GetStateFileName() string {

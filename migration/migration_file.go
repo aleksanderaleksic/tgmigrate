@@ -12,7 +12,7 @@ import (
 )
 
 type FileContent struct {
-	Config     Config            `hcl:"migration_config,block"`
+	Config     Config            `hcl:"migration,block"`
 	Migrations []MigrationsBlock `hcl:"migrate,block"`
 }
 

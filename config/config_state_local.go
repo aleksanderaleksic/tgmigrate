@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/hashicorp/hcl/v2/gohcl"
-	"io/ioutil"
 )
 
 type LocalStateConfig struct {
@@ -26,13 +25,8 @@ func (l LocalStateConfig) GetStateDirectory() string {
 	return l.Directory
 }
 
-func (l *LocalStateConfig) GetBackupStateDirectory() string {
-	if l.BackupStateDirectory != nil {
-		return *l.BackupStateDirectory
-	}
-	path, _ := ioutil.TempDir("", "tgmigrate-state-backup")
-	l.BackupStateDirectory = &path
-	return path
+func (l LocalStateConfig) GetBackupStateDirectory() string {
+	return l.GetStateDirectory()
 }
 
 func (l LocalStateConfig) GetStateFileName() string {

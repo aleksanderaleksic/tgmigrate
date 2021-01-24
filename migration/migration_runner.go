@@ -39,6 +39,9 @@ func (r Runner) Apply() error {
 		var failingMigration = ""
 
 		for _, migration := range migrationFile.Migrations {
+			if isSuccess == false {
+				break
+			}
 			switch migration.Type {
 			case "remove":
 				success, removeError := r.StateInterface.Remove(
@@ -89,7 +92,7 @@ func (r Runner) Apply() error {
 			r.HistoryInterface.StoreMigrationObject(migrationFile.Metadata.FileName, history.FailedResult, migrationFile.Metadata.FileHash)
 			_ = r.HistoryInterface.WriteToStorage()
 
-			return fmt.Errorf("failed to apply migrtaion '%s' '%s' with  with error: %s", migrationFile.Metadata.FileName, failingMigration, migrationError)
+			return fmt.Errorf("failed to apply migrtaion '%s' '%s' \n with error: %s", migrationFile.Metadata.FileName, failingMigration, migrationError)
 		}
 	}
 
