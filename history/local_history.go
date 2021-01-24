@@ -1,11 +1,13 @@
 package history
 
 import (
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"path/filepath"
 )
 
 type LocalHistory struct {
+	context            common.Context
 	LocalStorageConfig config.LocalHistoryStorageConfig
 	StorageHistory     *StorageHistory
 }
@@ -19,9 +21,9 @@ func (h LocalHistory) IsMigrationApplied(hash string) (*Result, error) {
 	return &Result{State: ResultStateUnapplied}, nil
 }
 
-func (h *LocalHistory) InitializeHistory(skipUserInteraction bool) (*StorageHistory, error) {
+func (h *LocalHistory) InitializeHistory(ctx common.Context) (*StorageHistory, error) {
 	historyPath := h.getHistoryPath()
-	storageHistory, err := getOrCreateNewHistoryFile(historyPath, skipUserInteraction)
+	storageHistory, err := getOrCreateNewHistoryFile(historyPath, ctx.SkipUserInteraction)
 	if err != nil {
 		return nil, err
 	}

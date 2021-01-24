@@ -15,12 +15,12 @@ import (
 
 type History interface {
 	IsMigrationApplied(hash string) (*Result, error)
-	InitializeHistory(skipUserInteraction bool) (*StorageHistory, error)
+	InitializeHistory(ctx common.Context) (*StorageHistory, error)
 	StoreMigrationObject(migrationName string, result Result, fileHash string)
 	WriteToStorage() error
 }
 
-func GetHistoryInterface(c config.Config) (History, error) {
+func GetHistoryInterface(c config.Config, ctx common.Context) (History, error) {
 	switch c.History.Storage.Type {
 	case "s3":
 		conf := c.History.Storage.Config.(*config.S3HistoryStorageConfig)
@@ -44,12 +44,14 @@ func GetHistoryInterface(c config.Config) (History, error) {
 			}
 		}
 		return &S3History{
+			context:         ctx,
 			S3StorageConfig: *conf,
 			session:         *sess,
 		}, nil
 	case "local":
 		conf := c.History.Storage.Config.(*config.LocalHistoryStorageConfig)
 		return &LocalHistory{
+			context:            ctx,
 			LocalStorageConfig: *conf,
 		}, nil
 	default:

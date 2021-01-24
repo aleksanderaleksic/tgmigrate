@@ -2,6 +2,7 @@ package state
 
 import (
 	"fmt"
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"os"
@@ -10,6 +11,7 @@ import (
 )
 
 type LocalState struct {
+	context   common.Context
 	State     config.State
 	Terraform *tfexec.Terraform
 }

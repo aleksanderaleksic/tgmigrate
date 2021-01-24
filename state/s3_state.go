@@ -1,6 +1,7 @@
 package state
 
 import (
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"os"
@@ -8,6 +9,7 @@ import (
 )
 
 type S3State struct {
+	context   common.Context
 	State     config.State
 	Sync      S3Sync
 	Terraform *tfexec.Terraform
@@ -29,7 +31,7 @@ func (s *S3State) InitializeState() error {
 }
 
 func (s S3State) Complete() error {
-	err := s.Sync.UpSync3State()
+	err := s.Sync.UpSync3State(s.context.DryRun)
 	os.RemoveAll(s.State.Config.GetStateDirectory())
 	os.RemoveAll(filepath.Dir(s.Terraform.ExecPath()))
 

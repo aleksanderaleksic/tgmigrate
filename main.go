@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/aleksanderaleksic/tgmigrate/command"
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/aleksanderaleksic/tgmigrate/history"
 	"github.com/aleksanderaleksic/tgmigrate/migration"
@@ -35,7 +36,12 @@ func main() {
 			&cli.BoolFlag{
 				Name:    "yes",
 				Aliases: []string{"y"},
-				Usage:   "Skip all yes confirm steps",
+				Usage:   "Skip all user interaction",
+			},
+			&cli.BoolFlag{
+				Name:    "dryrun",
+				Aliases: []string{"d"},
+				Usage:   "Dont do any permanent changes, like actually uploading the state changes",
 			},
 		},
 		Before: func(context *cli.Context) error {
@@ -70,21 +76,26 @@ func Initialize(c *cli.Context) (*migration.Runner, error) {
 		return nil, err
 	}
 
+	ctx := common.Context{
+		SkipUserInteraction: c.Bool("y"),
+		DryRun:              c.Bool("d"),
+	}
+
 	migrationFiles, err := migration.GetMigrationFiles(*cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	stateInterface, err := state.GetStateInterface(*cfg)
+	stateInterface, err := state.GetStateInterface(*cfg, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	historyInterface, err := history.GetHistoryInterface(*cfg)
+	historyInterface, err := history.GetHistoryInterface(*cfg, ctx)
 	if err != nil {
 		return nil, err
 	}
-	_, err = historyInterface.InitializeHistory(c.Bool("y"))
+	_, err = historyInterface.InitializeHistory(ctx)
 	if err != nil {
 		return nil, err
 	}

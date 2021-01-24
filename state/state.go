@@ -26,7 +26,7 @@ type State interface {
 	Remove(resource ResourceContext) (bool, error)
 }
 
-func GetStateInterface(c config.Config) (State, error) {
+func GetStateInterface(c config.Config, ctx common.Context) (State, error) {
 	switch c.State.Type {
 	case "s3":
 		conf := *c.State.Config.(*config.S3StateConfig)
@@ -51,7 +51,8 @@ func GetStateInterface(c config.Config) (State, error) {
 		}
 
 		return &S3State{
-			State: c.State,
+			context: ctx,
+			State:   c.State,
 			Sync: S3Sync{
 				config:  conf,
 				session: *sess,
@@ -60,6 +61,7 @@ func GetStateInterface(c config.Config) (State, error) {
 		}, nil
 	case "local":
 		return &LocalState{
+			context:   ctx,
 			State:     c.State,
 			Terraform: nil,
 		}, nil

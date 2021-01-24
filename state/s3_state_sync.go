@@ -24,7 +24,7 @@ func (s S3Sync) DownSync3State() error {
 	return nil
 }
 
-func (s S3Sync) UpSync3State() error {
+func (s S3Sync) UpSync3State(dryRun bool) error {
 	//Remove all backup files, dont want to upload them to s3
 	_ = filepath.Walk(s.config.GetStateDirectory(),
 		func(path string, info os.FileInfo, err error) error {
@@ -43,7 +43,12 @@ func (s S3Sync) UpSync3State() error {
 			return nil
 		})
 
-	syncManager := s3sync.New(&s.session, s3sync.WithDryRun())
+	var syncManager *s3sync.Manager
+	if dryRun {
+		syncManager = s3sync.New(&s.session, s3sync.WithDryRun())
+	} else {
+		syncManager = s3sync.New(&s.session)
+	}
 
 	err := syncManager.Sync(s.config.GetStateDirectory(), "s3://"+s.config.Bucket)
 	if err != nil {
