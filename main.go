@@ -16,12 +16,12 @@ import (
 var version = "0.0.0"
 
 var globalRunner = migration.Runner{
+	Context:          nil,
 	HistoryInterface: nil,
 	StateInterface:   nil,
 	MigrationFiles:   nil,
 }
 var applyCommand = &command.ApplyCommand{Runner: &globalRunner}
-var planCommand = &command.PlanCommand{}
 
 func main() {
 	app := &cli.App{
@@ -52,15 +52,8 @@ func main() {
 			globalRunner = *runner
 			return nil
 		},
-		After: func(context *cli.Context) error {
-			if globalRunner.StateInterface == nil {
-				return nil
-			}
-			return globalRunner.StateInterface.Complete()
-		},
 		Commands: []*cli.Command{
 			applyCommand.GetCLICommand(),
-			planCommand.GetCLICommand(),
 		},
 	}
 
@@ -101,6 +94,7 @@ func Initialize(c *cli.Context) (*migration.Runner, error) {
 	}
 
 	runner := migration.Runner{
+		Context:          &ctx,
 		HistoryInterface: historyInterface,
 		StateInterface:   stateInterface,
 		MigrationFiles:   *migrationFiles,

@@ -11,16 +11,21 @@ type ApplyCommand struct {
 
 func (command ApplyCommand) GetCLICommand() *cli.Command {
 	cmd := cli.Command{
-		Name:                   "apply",
-		Aliases:                nil,
-		Usage:                  "",
-		UsageText:              "",
-		Description:            "",
-		ArgsUsage:              "",
-		Category:               "",
-		BashComplete:           nil,
-		Before:                 nil,
-		After:                  nil,
+		Name:         "apply",
+		Aliases:      nil,
+		Usage:        "",
+		UsageText:    "",
+		Description:  "",
+		ArgsUsage:    "",
+		Category:     "",
+		BashComplete: nil,
+		Before:       nil,
+		After: func(context *cli.Context) error {
+			if command.Runner.StateInterface == nil {
+				return nil
+			}
+			return command.Runner.StateInterface.Complete()
+		},
 		Action:                 command.run,
 		OnUsageError:           nil,
 		Subcommands:            nil,

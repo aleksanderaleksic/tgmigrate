@@ -2,14 +2,13 @@ package migration
 
 import (
 	"fmt"
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/history"
 	"github.com/aleksanderaleksic/tgmigrate/state"
 )
 
-type RunnerResult struct {
-}
-
 type Runner struct {
+	Context          *common.Context
 	HistoryInterface history.History
 	StateInterface   state.State
 	MigrationFiles   []File
@@ -100,10 +99,6 @@ func (r Runner) Apply() error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func (r Runner) Plan() error {
 	return nil
 }
 
