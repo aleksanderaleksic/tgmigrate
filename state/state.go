@@ -9,8 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hashicorp/terraform-exec/tfexec"
-	"github.com/hashicorp/terraform-exec/tfinstall"
-	"io/ioutil"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -65,12 +64,7 @@ func GetStateInterface(c config.Config, ctx common.Context) (State, error) {
 }
 
 func initializeTerraformExec(stateConfig config.State) (*tfexec.Terraform, error) {
-	fmt.Println("Initializing terraform")
-	tmpDir, err := ioutil.TempDir("", "tfinstall")
-	if err != nil {
-		return nil, err
-	}
-	execPath, err := tfinstall.Find(context.Background(), tfinstall.LatestVersion(tmpDir, false))
+	execPath, err := exec.LookPath("terraform")
 	if err != nil {
 		return nil, err
 	}
