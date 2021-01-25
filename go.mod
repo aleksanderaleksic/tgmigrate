@@ -10,3 +10,5 @@ require (
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/zclconf/go-cty v1.2.1
 )
+
+replace github.com/hashicorp/terraform-exec => github.com/aleksanderaleksic/terraform-exec v0.12.0
