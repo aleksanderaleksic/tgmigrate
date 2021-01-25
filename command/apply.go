@@ -26,7 +26,7 @@ func (command ApplyCommand) GetCLICommand() *cli.Command {
 			}
 			return command.Runner.StateInterface.Complete()
 		},
-		Action:                 command.run,
+		Action:                 command.runAll,
 		OnUsageError:           nil,
 		Subcommands:            nil,
 		Flags:                  nil,
@@ -41,6 +41,10 @@ func (command ApplyCommand) GetCLICommand() *cli.Command {
 	return &cmd
 }
 
-func (command ApplyCommand) run(c *cli.Context) error {
-	return command.Runner.Apply()
+func (command ApplyCommand) runAll(c *cli.Context) error {
+	environment := c.Args().First()
+	if environment == "" {
+		return command.Runner.Apply(nil)
+	}
+	return command.Runner.Apply(&environment)
 }

@@ -14,8 +14,8 @@ type Runner struct {
 	MigrationFiles   []File
 }
 
-func (r Runner) Apply() error {
-	migrationsToBeApplied, err := r.getMigrationsToBeApplied()
+func (r Runner) Apply(environment *string) error {
+	migrationsToBeApplied, err := r.getMigrationsToBeApplied(environment)
 	if err != nil {
 		return err
 	}
@@ -102,10 +102,14 @@ func (r Runner) Apply() error {
 	return nil
 }
 
-func (r Runner) getMigrationsToBeApplied() (*[]File, error) {
+func (r Runner) getMigrationsToBeApplied(environment *string) (*[]File, error) {
 	var migrationsToBeApplied []File
 
 	for _, migration := range r.MigrationFiles {
+		if environment != nil && !common.StringListContains(migration.Config.Environments, *environment) {
+			break
+		}
+
 		historyResult, err := r.HistoryInterface.IsMigrationApplied(migration.Metadata.FileHash)
 		if err != nil {
 			return nil, err

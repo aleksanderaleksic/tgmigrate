@@ -33,9 +33,6 @@ func (s *S3State) InitializeState() error {
 func (s S3State) Complete() error {
 	err := s.Sync.UpSync3State(s.context.DryRun)
 	os.RemoveAll(s.State.Config.GetStateDirectory())
-	if _, err := os.Stat(filepath.Dir(s.Terraform.ExecPath())); os.IsNotExist(err) {
-		os.RemoveAll(filepath.Dir(s.Terraform.ExecPath()))
-	}
 
 	if err != nil {
 		return err
