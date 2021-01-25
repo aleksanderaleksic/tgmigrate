@@ -15,15 +15,10 @@ import (
 // Version is a version number.
 var version = "0.0.0"
 
-var globalRunner = migration.Runner{
-	Context:          nil,
-	HistoryInterface: nil,
-	StateInterface:   nil,
-	MigrationFiles:   nil,
-}
-var applyCommand = &command.ApplyCommand{Runner: &globalRunner}
-
 func main() {
+	var runner migration.Runner
+	var applyCommand = &command.ApplyCommand{Runner: &runner}
+
 	app := &cli.App{
 		Version: version,
 		Name:    "tgmigrate",
@@ -45,11 +40,11 @@ func main() {
 			},
 		},
 		Before: func(context *cli.Context) error {
-			runner, err := Initialize(context)
+			r, err := Initialize(context)
 			if err != nil {
 				return err
 			}
-			globalRunner = *runner
+			runner = *r
 			return nil
 		},
 		Commands: []*cli.Command{
