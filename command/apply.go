@@ -21,10 +21,8 @@ func (command ApplyCommand) GetCLICommand() *cli.Command {
 		BashComplete: nil,
 		Before:       nil,
 		After: func(context *cli.Context) error {
-			if command.Runner.StateInterface == nil {
-				return nil
-			}
-			return command.Runner.StateInterface.Complete()
+			command.Runner.Cleanup()
+			return nil
 		},
 		Action:                 command.runAll,
 		OnUsageError:           nil,

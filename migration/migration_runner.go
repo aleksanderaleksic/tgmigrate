@@ -102,6 +102,15 @@ func (r Runner) Apply(environment *string) error {
 	return nil
 }
 
+func (r Runner) Cleanup() {
+	if r.StateInterface != nil {
+		r.StateInterface.Cleanup()
+	}
+	if r.HistoryInterface != nil {
+		r.HistoryInterface.Cleanup()
+	}
+}
+
 func (r Runner) getMigrationsToBeApplied(environment *string) (*[]File, error) {
 	var migrationsToBeApplied []File
 
