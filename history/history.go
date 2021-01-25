@@ -18,6 +18,7 @@ type History interface {
 	InitializeHistory(ctx common.Context) (*StorageHistory, error)
 	StoreMigrationObject(migrationName string, result Result, fileHash string)
 	WriteToStorage() error
+	Cleanup()
 }
 
 func GetHistoryInterface(c config.Config, ctx common.Context) (History, error) {

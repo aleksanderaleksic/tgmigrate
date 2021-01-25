@@ -67,7 +67,9 @@ func (h *S3History) WriteToStorage() error {
 		return err
 	}
 
-	os.RemoveAll(h.S3StorageConfig.GetLocalHistoryPath())
-
 	return nil
+}
+
+func (h S3History) Cleanup() {
+	os.RemoveAll(h.S3StorageConfig.GetLocalHistoryPath())
 }

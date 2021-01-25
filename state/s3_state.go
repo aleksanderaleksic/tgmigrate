@@ -32,8 +32,6 @@ func (s *S3State) InitializeState() error {
 
 func (s S3State) Complete() error {
 	err := s.Sync.UpSync3State(s.context.DryRun)
-	os.RemoveAll(s.State.Config.GetStateDirectory())
-
 	if err != nil {
 		return err
 	}
@@ -47,6 +45,10 @@ func (s S3State) Move(from ResourceContext, to ResourceContext) (bool, error) {
 
 func (s S3State) Remove(resource ResourceContext) (bool, error) {
 	return remove(s.Terraform, s.getAbsoluteStateDirPath(), s.State.Config.GetStateFileName(), resource)
+}
+
+func (s S3State) Cleanup() {
+	os.RemoveAll(s.State.Config.GetStateDirectory())
 }
 
 func (s S3State) getAbsoluteStateDirPath() string {
