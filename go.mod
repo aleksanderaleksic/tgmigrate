@@ -11,4 +11,4 @@ require (
 	github.com/zclconf/go-cty v1.2.1
 )
 
-replace github.com/hashicorp/terraform-exec => github.com/aleksanderaleksic/terraform-exec v0.12.0
+replace github.com/hashicorp/terraform-exec => github.com/aleksanderaleksic/terraform-exec v0.12.1-0.20210122070141-56f8ce6ed99d
