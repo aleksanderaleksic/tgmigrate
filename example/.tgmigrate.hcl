@@ -3,16 +3,16 @@ migration {
 
   history {
     storage "s3" {
-      bucket = "airthings-terraform-states-512741945438"
+      bucket = "airthings-terraform-states-${ACCOUNT}"
       region = "us-east-1"
-      assume_role = "arn:aws:iam::512741945438:role/admin"
+      assume_role = "arn:aws:iam::${ACCOUNT}:role/admin"
       key = "history.json"
     }
   }
 
   state "s3" {
-    bucket = "airthings-terraform-states-512741945438"
+    bucket = "airthings-terraform-states-${ACCOUNT}"
     region = "us-east-1"
-    assume_role = "arn:aws:iam::512741945438:role/admin"
+    assume_role = "arn:aws:iam::${ACCOUNT}:role/admin"
   }
 }

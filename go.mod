@@ -8,4 +8,5 @@ require (
 	github.com/hashicorp/terraform-exec v0.12.0
 	github.com/seqsense/s3sync v1.8.0
 	github.com/urfave/cli/v2 v2.3.0
+	github.com/zclconf/go-cty v1.2.1
 )

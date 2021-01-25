@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"os"
 )
@@ -13,9 +14,9 @@ type S3HistoryStorageConfig struct {
 	historyPath *string
 }
 
-func ParseHistoryS3StorageConfig(configFile File) (*S3HistoryStorageConfig, error) {
+func ParseHistoryS3StorageConfig(configFile File, ctx *hcl.EvalContext) (*S3HistoryStorageConfig, error) {
 	var config S3HistoryStorageConfig
-	diags := gohcl.DecodeBody(configFile.Migration.History.Storage.Remain, nil, &config)
+	diags := gohcl.DecodeBody(configFile.Migration.History.Storage.Remain, ctx, &config)
 
 	if diags.HasErrors() {
 		return nil, diags

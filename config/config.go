@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/urfave/cli/v2"
+	"github.com/zclconf/go-cty/cty"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -34,14 +35,19 @@ type Config struct {
 	State                State
 }
 
-func GetConfigFile(ctx *cli.Context) (*Config, error) {
+func GetConfigFile(ctx *cli.Context, configVariables map[string]cty.Value) (*Config, error) {
 	confFilePath := getConfigFilePathFromFlags(ctx)
 	source, err := ioutil.ReadFile(confFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	conf, err := parseConfigFile(confFilePath, source)
+	hclContext := hcl.EvalContext{
+		Variables: configVariables,
+		Functions: nil,
+	}
+
+	conf, err := parseConfigFile(confFilePath, source, &hclContext)
 	if err != nil {
 		return nil, err
 	}
@@ -49,19 +55,19 @@ func GetConfigFile(ctx *cli.Context) (*Config, error) {
 	return conf, nil
 }
 
-func parseConfigFile(filename string, source []byte) (*Config, error) {
+func parseConfigFile(filename string, source []byte, ctx *hcl.EvalContext) (*Config, error) {
 	var f File
 	err := hclsimple.Decode(filename, source, nil, &f)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode config file: %s, err: %s", filename, err)
 	}
 
-	historyStorageConfig, err := getHistoryStorageConfig(f)
+	historyStorageConfig, err := getHistoryStorageConfig(f, ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	stateConfig, err := getStateConfig(f)
+	stateConfig, err := getStateConfig(f, ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -89,21 +95,21 @@ func parseConfigFile(filename string, source []byte) (*Config, error) {
 	return &cfg, nil
 }
 
-func getHistoryStorageConfig(file File) (interface{}, error) {
+func getHistoryStorageConfig(file File, ctx *hcl.EvalContext) (interface{}, error) {
 	t := file.Migration.History.Storage.Type
 	switch t {
 	case "s3":
-		return ParseHistoryS3StorageConfig(file)
+		return ParseHistoryS3StorageConfig(file, ctx)
 	default:
 		return nil, fmt.Errorf("failed to get storage block from config file, no storage block configuration with type: %s", t)
 	}
 }
 
-func getStateConfig(file File) (StateConfig, error) {
+func getStateConfig(file File, ctx *hcl.EvalContext) (StateConfig, error) {
 	t := file.Migration.State.Type
 	switch t {
 	case "s3":
-		return ParseS3StateConfig(file)
+		return ParseS3StateConfig(file, ctx)
 	default:
 		return nil, fmt.Errorf("failed to get storage block from config file, no storage block configuration with type: %s", t)
 	}

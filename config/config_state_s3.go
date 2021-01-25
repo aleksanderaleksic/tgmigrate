@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"os"
 )
@@ -14,9 +15,9 @@ type S3StateConfig struct {
 	backupStateDirectory *string
 }
 
-func ParseS3StateConfig(configFile File) (*S3StateConfig, error) {
+func ParseS3StateConfig(configFile File, ctx *hcl.EvalContext) (*S3StateConfig, error) {
 	var config S3StateConfig
-	diags := gohcl.DecodeBody(configFile.Migration.State.Remain, nil, &config)
+	diags := gohcl.DecodeBody(configFile.Migration.State.Remain, ctx, &config)
 
 	if diags.HasErrors() {
 		return nil, diags

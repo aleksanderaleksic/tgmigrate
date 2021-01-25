@@ -8,8 +8,10 @@ import (
 	"github.com/aleksanderaleksic/tgmigrate/migration"
 	"github.com/aleksanderaleksic/tgmigrate/state"
 	"github.com/urfave/cli/v2"
+	"github.com/zclconf/go-cty/cty"
 	"log"
 	"os"
+	"strings"
 )
 
 // Version is a version number.
@@ -38,6 +40,12 @@ func main() {
 				Aliases: []string{"d"},
 				Usage:   "Dont do any permanent changes, like actually uploading the state changes",
 			},
+			&cli.StringFlag{
+				Name:    "conf-variables",
+				Aliases: []string{"cv"},
+				Usage:   "ACCOUNT=123456789;NAME=test will be applied to the config file strings using ${ACCOUNT} and ${NAME}",
+				EnvVars: []string{"TG-MIGRATE_CONFIG_VARIABLES"},
+			},
 		},
 		Before: func(context *cli.Context) error {
 			r, err := Initialize(context)
@@ -59,7 +67,8 @@ func main() {
 }
 
 func Initialize(c *cli.Context) (*migration.Runner, error) {
-	cfg, err := config.GetConfigFile(c)
+	configVariables := getConfigVariables(c)
+	cfg, err := config.GetConfigFile(c, configVariables)
 	if err != nil {
 		return nil, err
 	}
@@ -96,4 +105,26 @@ func Initialize(c *cli.Context) (*migration.Runner, error) {
 	}
 
 	return &runner, nil
+}
+
+func getConfigVariables(c *cli.Context) map[string]cty.Value {
+	configVariablesFlag := c.String("cv")
+
+	if configVariablesFlag == "" {
+		return map[string]cty.Value{}
+	}
+
+	rawKeyValue := strings.Split(configVariablesFlag, ";")
+
+	var keyValue = map[string]cty.Value{}
+
+	for _, raw := range rawKeyValue {
+		if raw == "" {
+			break
+		}
+		split := strings.Split(raw, "=")
+		keyValue[split[0]] = cty.StringVal(split[1])
+	}
+
+	return keyValue
 }
