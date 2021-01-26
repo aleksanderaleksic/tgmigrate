@@ -21,7 +21,7 @@ func (r Runner) Apply(environment *string) error {
 	}
 
 	if len(*migrationsToBeApplied) == 0 {
-		fmt.Printf("No migrations will be applied")
+		fmt.Println("No migrations will be applied")
 		return nil
 	}
 
