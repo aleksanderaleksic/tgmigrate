@@ -7,10 +7,11 @@ import (
 	"github.com/urfave/cli/v2"
 	"github.com/zclconf/go-cty/cty"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
-const defaultConfigFile = ".tgmigrate.hcl"
+var defaultConfigFile = ".tgmigrate.hcl"
 
 type File struct {
 	Migration struct {
@@ -39,7 +40,7 @@ func GetConfigFile(ctx *cli.Context, configVariables map[string]cty.Value) (*Con
 	confFilePath := getConfigFilePathFromFlags(ctx)
 	source, err := ioutil.ReadFile(confFilePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to find %s in current or parrent directories, a config file is required", defaultConfigFile)
 	}
 
 	hclContext := hcl.EvalContext{
@@ -135,5 +136,40 @@ func getConfigFilePathFromFlags(c *cli.Context) string {
 		path, _ := filepath.Abs(configFlagValue)
 		return path
 	}
-	return defaultConfigFile
+
+	path, err := findFirstConfigFileInParentFolders()
+	if err != nil {
+		return defaultConfigFile
+	}
+
+	return *path
+}
+
+func findFirstConfigFileInParentFolders() (*string, error) {
+	basePath, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	targetPath, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		if targetPath == basePath {
+			break
+		}
+
+		file := filepath.Join(basePath, defaultConfigFile)
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			//Going up a directory if no config file
+			basePath = filepath.Dir(basePath)
+			continue
+		}
+
+		return &file, nil
+	}
+
+	return &defaultConfigFile, nil
 }
