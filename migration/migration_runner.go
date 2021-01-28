@@ -15,10 +15,18 @@ type Runner struct {
 }
 
 func (r Runner) Apply(environment *string) error {
+	_, err := r.HistoryInterface.InitializeHistory(*r.Context)
+	if err != nil {
+		return err
+	}
+
 	migrationsToBeApplied, err := r.getMigrationsToBeApplied(environment)
 	if err != nil {
 		return err
 	}
+
+	defer r.HistoryInterface.Cleanup()
+	defer r.StateInterface.Cleanup()
 
 	if len(*migrationsToBeApplied) == 0 {
 		fmt.Println("No migrations will be applied")
@@ -99,16 +107,13 @@ func (r Runner) Apply(environment *string) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
 
-func (r Runner) Cleanup() {
-	if r.StateInterface != nil {
-		r.StateInterface.Cleanup()
+	err = r.StateInterface.Complete()
+	if err != nil {
+		return err
 	}
-	if r.HistoryInterface != nil {
-		r.HistoryInterface.Cleanup()
-	}
+
+	return nil
 }
 
 func (r Runner) getMigrationsToBeApplied(environment *string) (*[]File, error) {

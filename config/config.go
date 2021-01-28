@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var defaultConfigFile = ".tgmigrate.hcl"
@@ -30,14 +31,16 @@ type File struct {
 }
 
 type Config struct {
+	Path                 string
 	MigrationDir         string
 	AbsoluteMigrationDir string
 	History              History
 	State                State
 }
 
-func GetConfigFile(ctx *cli.Context, configVariables map[string]cty.Value) (*Config, error) {
-	confFilePath := getConfigFilePathFromFlags(ctx)
+func GetConfigFile(ctx *cli.Context) (*Config, error) {
+	configVariables := getConfigVariables(ctx)
+	confFilePath := GetConfigFilePathFromFlags(ctx)
 	source, err := ioutil.ReadFile(confFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to find %s in current or parrent directories, a config file is required", defaultConfigFile)
@@ -56,11 +59,11 @@ func GetConfigFile(ctx *cli.Context, configVariables map[string]cty.Value) (*Con
 	return conf, nil
 }
 
-func parseConfigFile(filename string, source []byte, ctx *hcl.EvalContext) (*Config, error) {
+func parseConfigFile(filePath string, source []byte, ctx *hcl.EvalContext) (*Config, error) {
 	var f File
-	err := hclsimple.Decode(filename, source, nil, &f)
+	err := hclsimple.Decode(filePath, source, nil, &f)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode config file: %s, err: %s", filename, err)
+		return nil, fmt.Errorf("failed to decode config file: %s, err: %s", filePath, err)
 	}
 
 	historyStorageConfig, err := getHistoryStorageConfig(f, ctx)
@@ -73,12 +76,13 @@ func parseConfigFile(filename string, source []byte, ctx *hcl.EvalContext) (*Con
 		return nil, err
 	}
 
-	path, err := getAbsoluteMigrationDirPath(filename, f.Migration.MigrationDir)
+	path, err := getAbsoluteMigrationDirPath(filePath, f.Migration.MigrationDir)
 	if err != nil {
 		return nil, err
 	}
 
 	cfg := Config{
+		Path:                 filePath,
 		MigrationDir:         f.Migration.MigrationDir,
 		AbsoluteMigrationDir: *path,
 		History: History{
@@ -129,7 +133,7 @@ func getAbsoluteMigrationDirPath(configFilePath string, migrationDir string) (*s
 	return &migrationDirectory, nil
 }
 
-func getConfigFilePathFromFlags(c *cli.Context) string {
+func GetConfigFilePathFromFlags(c *cli.Context) string {
 	configFlagValue := c.String("config")
 
 	if configFlagValue != "" {
@@ -172,4 +176,26 @@ func findFirstConfigFileInParentFolders() (*string, error) {
 	}
 
 	return &defaultConfigFile, nil
+}
+
+func getConfigVariables(c *cli.Context) map[string]cty.Value {
+	configVariablesFlag := c.String("cv")
+
+	if configVariablesFlag == "" {
+		return map[string]cty.Value{}
+	}
+
+	rawKeyValue := strings.Split(configVariablesFlag, ";")
+
+	var keyValue = map[string]cty.Value{}
+
+	for _, raw := range rawKeyValue {
+		if raw == "" {
+			break
+		}
+		split := strings.Split(raw, "=")
+		keyValue[split[0]] = cty.StringVal(split[1])
+	}
+
+	return keyValue
 }

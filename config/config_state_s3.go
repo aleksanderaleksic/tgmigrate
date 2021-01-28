@@ -3,16 +3,13 @@ package config
 import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
-	"os"
 )
 
 type S3StateConfig struct {
-	Bucket               string  `hcl:"bucket"`
-	Region               string  `hcl:"region"`
-	StateFileName        *string `hcl:"state_file_name,optional"`
-	AssumeRole           *string `hcl:"assume_role,optional"`
-	stateDirectory       *string
-	backupStateDirectory *string
+	Bucket        string  `hcl:"bucket"`
+	Region        string  `hcl:"region"`
+	StateFileName *string `hcl:"state_file_name,optional"`
+	AssumeRole    *string `hcl:"assume_role,optional"`
 }
 
 func ParseS3StateConfig(configFile File, ctx *hcl.EvalContext) (*S3StateConfig, error) {
@@ -24,20 +21,6 @@ func ParseS3StateConfig(configFile File, ctx *hcl.EvalContext) (*S3StateConfig, 
 	}
 
 	return &config, nil
-}
-
-func (s *S3StateConfig) GetStateDirectory() string {
-	if s.stateDirectory != nil {
-		return *s.stateDirectory
-	}
-	dirName := s.Bucket + "_state"
-	s.stateDirectory = &dirName
-	_ = os.Mkdir(dirName, 0777)
-	return *s.stateDirectory
-}
-
-func (s *S3StateConfig) GetBackupStateDirectory() string {
-	return s.GetStateDirectory()
 }
 
 func (s S3StateConfig) GetStateFileName() string {

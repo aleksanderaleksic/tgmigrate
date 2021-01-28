@@ -21,12 +21,12 @@ type ResourceContext struct {
 type State interface {
 	InitializeState() error
 	Complete() error
-	Cleanup()
 	Move(from ResourceContext, to ResourceContext) (bool, error)
 	Remove(resource ResourceContext) (bool, error)
+	Cleanup()
 }
 
-func GetStateInterface(c config.Config, ctx common.Context) (State, error) {
+func GetStateInterface(c config.Config, ctx common.Context, cache common.Cache) (State, error) {
 	switch c.State.Type {
 	case "s3":
 		conf := *c.State.Config.(*config.S3StateConfig)
@@ -56,21 +56,23 @@ func GetStateInterface(c config.Config, ctx common.Context) (State, error) {
 			Sync: S3Sync{
 				config:  conf,
 				session: *sess,
+				cache:   cache,
 			},
 			Terraform: nil,
+			Cache:     cache,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unknown history storage type: %s", c.History.Storage.Type)
 	}
 }
 
-func initializeTerraformExec(stateConfig config.State) (*tfexec.Terraform, error) {
+func initializeTerraformExec(workingDirectory string) (*tfexec.Terraform, error) {
 	execPath, err := exec.LookPath("terraform")
 	if err != nil {
 		return nil, err
 	}
 
-	workingDir, _ := filepath.Abs(stateConfig.Config.GetStateDirectory())
+	workingDir, _ := filepath.Abs(workingDirectory)
 	tf, err := tfexec.NewTerraform(workingDir, execPath)
 	if err != nil {
 		return nil, err
@@ -128,4 +130,9 @@ func remove(terraform *tfexec.Terraform, stateDir string, stateFileName string, 
 		return false, err
 	}
 	return true, err
+}
+
+func getStateDirPath(c common.Cache) string {
+	path, _ := filepath.Abs(filepath.Join(c.GetCacheDirectoryPath(), "state"))
+	return path
 }

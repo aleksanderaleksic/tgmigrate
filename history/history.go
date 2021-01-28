@@ -21,7 +21,7 @@ type History interface {
 	Cleanup()
 }
 
-func GetHistoryInterface(c config.Config, ctx common.Context) (History, error) {
+func GetHistoryInterface(c config.Config, ctx common.Context, cache common.Cache) (History, error) {
 	switch c.History.Storage.Type {
 	case "s3":
 		conf := c.History.Storage.Config.(*config.S3HistoryStorageConfig)
@@ -48,6 +48,7 @@ func GetHistoryInterface(c config.Config, ctx common.Context) (History, error) {
 			context:         ctx,
 			S3StorageConfig: *conf,
 			session:         *sess,
+			Cache:           cache,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unknown history storage type: %s", c.History.Storage.Type)
@@ -55,6 +56,11 @@ func GetHistoryInterface(c config.Config, ctx common.Context) (History, error) {
 }
 
 func writeStorageHistory(path string, storageHistory StorageHistory) error {
+	err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
 	encodedStorageHistory, err := EncodeStorageHistory(storageHistory)
 	if err != nil {
 		return err

@@ -55,7 +55,8 @@ folders up to `$HOME`
 
 `migration = "./migration"` refers to the directory where the migration files are located, this path is relative to the
 config file. </br>
-`history` is where you can configure where to store the history, currently its only `storage "s3"` that's supported.</br>
+`history` is where you can configure where to store the history, currently its only `storage "s3"` that's
+supported.</br>
 `state` is where you configure where your state is located, also here its only `state "s3"` that's supported.
 
 A nice feature in the config file is the support for variables using the common `${variable_name}` syntax, How to
@@ -106,8 +107,8 @@ optional.
 The `migrate` blocks have 2 supported types: `move` and `remove`.</br>
 On `move` you need to specify a `from` and `to` block, while on `remove` you can provide the `state` and `resource`
 variable. </br>
-In both cases `state` refers to the location within the s3_bucket. `resource` refers to the resource type + name in
-the state file.
+In both cases `state` refers to the location within the s3_bucket. `resource` refers to the resource type + name in the
+state file.
 
 ### Integrate with terragrunt:
 
@@ -143,6 +144,7 @@ before_hook "run_migrations" {
 }
 ```
 
-Notice the `--cv`(config-variables) flag, here we specify the `ACCOUNT_ID` and the `ASSUME_ROLE` variable that we use in the config file.</br>
-Also notice the `prod` sub-command, this is telling tgmigrate to only apply migrations for the prod environment. </br> 
+Notice the `--cv`(config-variables) flag, here we specify the `ACCOUNT_ID` and the `ASSUME_ROLE` variable that we use in
+the config file.</br>
+Also notice the `prod` sub-command, this is telling tgmigrate to only apply migrations for the prod environment. </br>
 This means that the migration file above would be applied in this case, because it has `prod` in the environments list.

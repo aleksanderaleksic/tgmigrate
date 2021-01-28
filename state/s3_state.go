@@ -5,7 +5,6 @@ import (
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"os"
-	"path/filepath"
 )
 
 type S3State struct {
@@ -13,10 +12,16 @@ type S3State struct {
 	State     config.State
 	Sync      S3Sync
 	Terraform *tfexec.Terraform
+	Cache     common.Cache
 }
 
 func (s *S3State) InitializeState() error {
-	tf, err := initializeTerraformExec(s.State)
+	err := os.MkdirAll(getStateDirPath(s.Cache), os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	tf, err := initializeTerraformExec(getStateDirPath(s.Cache))
 	s.Terraform = tf
 	if err != nil {
 		return err
@@ -40,18 +45,13 @@ func (s S3State) Complete() error {
 }
 
 func (s S3State) Move(from ResourceContext, to ResourceContext) (bool, error) {
-	return move(s.Terraform, s.getAbsoluteStateDirPath(), s.State.Config.GetStateFileName(), from, to)
+	return move(s.Terraform, getStateDirPath(s.Cache), s.State.Config.GetStateFileName(), from, to)
 }
 
 func (s S3State) Remove(resource ResourceContext) (bool, error) {
-	return remove(s.Terraform, s.getAbsoluteStateDirPath(), s.State.Config.GetStateFileName(), resource)
+	return remove(s.Terraform, getStateDirPath(s.Cache), s.State.Config.GetStateFileName(), resource)
 }
 
 func (s S3State) Cleanup() {
-	os.RemoveAll(s.State.Config.GetStateDirectory())
-}
-
-func (s S3State) getAbsoluteStateDirPath() string {
-	path, _ := filepath.Abs(s.State.Config.GetStateDirectory())
-	return path
+	os.RemoveAll(getStateDirPath(s.Cache))
 }

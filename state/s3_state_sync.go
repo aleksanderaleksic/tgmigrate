@@ -1,6 +1,7 @@
 package state
 
 import (
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/seqsense/s3sync"
@@ -12,11 +13,12 @@ import (
 type S3Sync struct {
 	config  config.S3StateConfig
 	session session.Session
+	cache   common.Cache
 }
 
 func (s S3Sync) DownSync3State() error {
 	syncManager := s3sync.New(&s.session)
-	err := syncManager.Sync("s3://"+s.config.Bucket, s.config.GetStateDirectory())
+	err := syncManager.Sync("s3://"+s.config.Bucket, getStateDirPath(s.cache))
 	if err != nil {
 		return err
 	}
@@ -25,23 +27,23 @@ func (s S3Sync) DownSync3State() error {
 }
 
 func (s S3Sync) UpSync3State(dryRun bool) error {
+	stateDirPath := getStateDirPath(s.cache)
 	//Remove all backup files, dont want to upload them to s3
-	_ = filepath.Walk(s.config.GetStateDirectory(),
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() {
-				return nil
-			}
-			if !strings.HasSuffix(path, ".backup") {
-				return nil
-			}
-
-			os.RemoveAll(path)
-
+	_ = filepath.Walk(stateDirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
 			return nil
-		})
+		}
+		if !strings.HasSuffix(path, ".backup") {
+			return nil
+		}
+
+		os.RemoveAll(path)
+
+		return nil
+	})
 
 	var syncManager *s3sync.Manager
 	if dryRun {
@@ -50,7 +52,7 @@ func (s S3Sync) UpSync3State(dryRun bool) error {
 		syncManager = s3sync.New(&s.session)
 	}
 
-	err := syncManager.Sync(s.config.GetStateDirectory(), "s3://"+s.config.Bucket)
+	err := syncManager.Sync(stateDirPath, "s3://"+s.config.Bucket)
 	if err != nil {
 		return err
 	}
