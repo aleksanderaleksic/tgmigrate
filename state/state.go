@@ -95,14 +95,27 @@ func move(terraform *tfexec.Terraform, stateDir string, stateFileName string, fr
 	fromBackupStatePath, _ := filepath.Abs(filepath.Join(stateDir, from.State, stateFileName+".backup"))
 	toBackupStatePath, _ := filepath.Abs(filepath.Join(stateDir, to.State, stateFileName+".backup"))
 
+	var options []tfexec.StateMvCmdOption
+	if from.State == to.State {
+		options = []tfexec.StateMvCmdOption{
+			tfexec.State(fromStateFilePath),
+			tfexec.Backup(fromBackupStatePath),
+			tfexec.BackupOut(toBackupStatePath),
+		}
+	} else {
+		options = []tfexec.StateMvCmdOption{
+			tfexec.State(fromStateFilePath),
+			tfexec.StateOut(toStateFilePath),
+			tfexec.Backup(fromBackupStatePath),
+			tfexec.BackupOut(toBackupStatePath),
+		}
+	}
+
 	err := terraform.StateMv(
 		context.Background(),
 		from.Resource,
 		to.Resource,
-		tfexec.State(fromStateFilePath),
-		tfexec.StateOut(toStateFilePath),
-		tfexec.Backup(fromBackupStatePath),
-		tfexec.BackupOut(toBackupStatePath),
+		options...,
 	)
 	if err != nil {
 		return false, err
