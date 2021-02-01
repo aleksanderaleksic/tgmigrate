@@ -148,3 +148,12 @@ Notice the `--cv`(config-variables) flag, here we specify the `ACCOUNT_ID` and t
 the config file.</br>
 Also notice the `prod` sub-command, this is telling tgmigrate to only apply migrations for the prod environment. </br>
 This means that the migration file above would be applied in this case, because it has `prod` in the environments list.
+
+###Example output
+```
+2021/02/01 14:32:16 Downloading us-east-1/apis/rest/terraform.tfstate to /home/user/terragrunt/.tgmigrate_cache/state/us-east-1/apis/rest/terraform.tfstate
+2021/02/01 14:32:16 Downloading us-east-1/apis/rest_2/terraform.tfstate to /home/user/terragrunt/.tgmigrate_cache/state/us-east-1/apis/rest_2/terraform.tfstate
+Migrations for sample_migration_file.hcl will be applied
+Moving aws_lambda_function.rest_2_api_lambda from us-east-1/apis/rest to us-east-1/apis/rest_2 aws_lambda_function.rest_api_lambda
+Removing aws_apigatewayv2_integration.rest_2_api from us-east-1/apis/rest
+```
