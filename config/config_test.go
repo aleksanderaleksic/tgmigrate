@@ -2,29 +2,13 @@ package config
 
 import (
 	"flag"
+	"github.com/aleksanderaleksic/tgmigrate/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 )
-
-func createTempTestDir(t *testing.T) string {
-	testDir, err := ioutil.TempDir("", "tgmigrate_test")
-	if err != nil {
-		t.Fatal("Failed to create tempdir for test")
-	}
-	return testDir
-}
-
-func testFile(t *testing.T, path string, value string) {
-	data := []byte(value)
-	err := ioutil.WriteFile(path, data, 0700)
-	if err != nil {
-		t.Fatal("Failed to create test config file")
-	}
-}
 
 func getContextWithConfigFIle(path string) *cli.Context {
 	app := cli.NewApp()
@@ -37,7 +21,7 @@ func getContextWithConfigFIle(path string) *cli.Context {
 
 func TestReadNonExistentConfigFile(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	defer os.RemoveAll(testDir)
 	ctx := getContextWithConfigFIle(filepath.Join(testDir, ".tgmigrate.hcl"))
 
@@ -48,11 +32,11 @@ func TestReadNonExistentConfigFile(t *testing.T) {
 
 func TestHandleErrorParsingConfig(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testFile(t, confFilePath, `
+	testutil.TestFile(t, confFilePath, `
 migration {}
 `)
 	ctx := getContextWithConfigFIle(confFilePath)
@@ -64,11 +48,11 @@ migration {}
 
 func TestHandleErrorParsingInvalidHistoryStorageConfig(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testFile(t, confFilePath, `
+	testutil.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -96,11 +80,11 @@ migration {
 
 func TestHandleErrorParsingInvalidStateStorageConfig(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testFile(t, confFilePath, `
+	testutil.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -128,7 +112,7 @@ migration {
 
 func TestHandleErrorFindingConfigInParentFolder(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	defer os.RemoveAll(testDir)
 
 	app := cli.NewApp()
@@ -142,12 +126,12 @@ func TestHandleErrorFindingConfigInParentFolder(t *testing.T) {
 
 func TestFindingConfigInParentFolder(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	confFilePath := filepath.Join("../", ".tgmigrate.hcl")
 	defer os.RemoveAll(testDir)
 	defer os.RemoveAll(confFilePath)
 
-	testFile(t, confFilePath, `
+	testutil.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -179,11 +163,11 @@ migration {
 
 func TestReadConfig(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testFile(t, confFilePath, `
+	testutil.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -241,11 +225,11 @@ migration {
 
 func TestReadConfigWithVariables(t *testing.T) {
 	ass := assert.New(t)
-	testDir := createTempTestDir(t)
+	testDir := testutil.CreateTempTestDir(t)
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testFile(t, confFilePath, `
+	testutil.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
