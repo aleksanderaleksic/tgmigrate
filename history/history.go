@@ -15,7 +15,7 @@ import (
 
 type History interface {
 	IsMigrationApplied(hash string) (*Result, error)
-	InitializeHistory(ctx common.Context) (*StorageHistory, error)
+	InitializeHistory() (*StorageHistory, error)
 	StoreMigrationObject(migrationName string, result Result, fileHash string)
 	WriteToStorage() error
 	Cleanup()

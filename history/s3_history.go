@@ -26,7 +26,7 @@ func (h S3History) IsMigrationApplied(hash string) (*Result, error) {
 	return &Result{State: ResultStateUnapplied}, nil
 }
 
-func (h *S3History) InitializeHistory(ctx common.Context) (*StorageHistory, error) {
+func (h *S3History) InitializeHistory() (*StorageHistory, error) {
 	historyPath := h.getHistoryStoragePath()
 
 	err := s3sync.New(&h.session).Sync("s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key, historyPath)
@@ -34,7 +34,7 @@ func (h *S3History) InitializeHistory(ctx common.Context) (*StorageHistory, erro
 		return nil, err
 	}
 
-	storageHistory, err := getOrCreateNewHistoryFile(historyPath, ctx.SkipUserInteraction)
+	storageHistory, err := getOrCreateNewHistoryFile(historyPath, h.context.SkipUserInteraction)
 	if err != nil {
 		return nil, err
 	}

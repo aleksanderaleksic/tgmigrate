@@ -16,7 +16,7 @@ type Runner struct {
 }
 
 func (r Runner) Apply(environment *string) error {
-	_, err := r.HistoryInterface.InitializeHistory(*r.Context)
+	_, err := r.HistoryInterface.InitializeHistory()
 	if err != nil {
 		return fmt.Errorf("unable to initialize history, error: %s", err)
 	}
