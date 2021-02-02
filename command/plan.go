@@ -9,15 +9,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type ApplyCommand struct {
+type PlanCommand struct {
 	Runner *migration.Runner
 }
 
-func (command *ApplyCommand) GetCLICommand() *cli.Command {
+func (command *PlanCommand) GetCLICommand() *cli.Command {
 	cmd := cli.Command{
-		Name:                   "apply",
+		Name:                   "plan",
 		Aliases:                nil,
-		Usage:                  "Applies the migrations",
+		Usage:                  "Plans the migrations",
 		UsageText:              "",
 		Description:            "",
 		ArgsUsage:              "",
@@ -40,7 +40,7 @@ func (command *ApplyCommand) GetCLICommand() *cli.Command {
 	return &cmd
 }
 
-func (command *ApplyCommand) run(c *cli.Context) error {
+func (command *PlanCommand) run(c *cli.Context) error {
 	environment := c.Args().First()
 	if environment == "" {
 		return command.Runner.Apply(nil)
@@ -48,7 +48,7 @@ func (command *ApplyCommand) run(c *cli.Context) error {
 	return command.Runner.Apply(&environment)
 }
 
-func (command *ApplyCommand) initialize(c *cli.Context) error {
+func (command *PlanCommand) initialize(c *cli.Context) error {
 	cfg, err := config.GetConfigFile(c)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (command *ApplyCommand) initialize(c *cli.Context) error {
 
 	ctx := common.Context{
 		SkipUserInteraction: c.Bool("y"),
-		DryRun:              false,
+		DryRun:              true,
 	}
 
 	stateInterface, err := state.GetStateInterface(*cfg, ctx, chc)

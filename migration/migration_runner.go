@@ -3,24 +3,29 @@ package migration
 import (
 	"fmt"
 	"github.com/aleksanderaleksic/tgmigrate/common"
+	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/aleksanderaleksic/tgmigrate/history"
 	"github.com/aleksanderaleksic/tgmigrate/state"
 )
 
 type Runner struct {
 	Context          *common.Context
+	Config           config.Config
 	HistoryInterface history.History
 	StateInterface   state.State
-	MigrationFiles   []File
 }
 
 func (r Runner) Apply(environment *string) error {
 	_, err := r.HistoryInterface.InitializeHistory(*r.Context)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to initialize history, error: %s", err)
 	}
 
-	migrationsToBeApplied, err := r.getMigrationsToBeApplied(environment)
+	migrationFiles, err := GetMigrationFiles(r.Config.AbsoluteMigrationDir)
+	if err != nil {
+		return fmt.Errorf("could not get migration files from '%s', error: %s", r.Config.AbsoluteMigrationDir, err)
+	}
+	migrationsToBeApplied, err := r.getMigrationsToBeApplied(*migrationFiles, environment)
 	if err != nil {
 		return err
 	}
@@ -116,10 +121,10 @@ func (r Runner) Apply(environment *string) error {
 	return nil
 }
 
-func (r Runner) getMigrationsToBeApplied(environment *string) (*[]File, error) {
+func (r Runner) getMigrationsToBeApplied(migrationFiles []File, environment *string) (*[]File, error) {
 	var migrationsToBeApplied []File
 
-	for _, migration := range r.MigrationFiles {
+	for _, migration := range migrationFiles {
 		if environment != nil && !common.StringListContains(migration.Config.Environments, *environment) {
 			break
 		}

@@ -12,6 +12,7 @@ var version = "0.1.1"
 
 func main() {
 	var applyCommand = command.ApplyCommand{}
+	var planCommand = command.PlanCommand{}
 
 	app := &cli.App{
 		Version: version,
@@ -28,7 +29,7 @@ func main() {
 				Usage:   "Skip all user interaction",
 			},
 			&cli.StringFlag{
-				Name:    "conf-variables",
+				Name:    "config-variables",
 				Aliases: []string{"cv"},
 				Usage:   "ACCOUNT=123456789;NAME=test will be applied to the config file strings using ${ACCOUNT} and ${NAME}",
 				EnvVars: []string{"TG-MIGRATE_CONFIG_VARIABLES"},
@@ -36,6 +37,7 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			applyCommand.GetCLICommand(),
+			planCommand.GetCLICommand(),
 		},
 	}
 

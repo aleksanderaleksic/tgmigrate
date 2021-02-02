@@ -3,7 +3,6 @@ package migration
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/aleksanderaleksic/tgmigrate/config"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"io/ioutil"
 	"os"
@@ -22,10 +21,10 @@ type File struct {
 	Migrations []Migration
 }
 
-func GetMigrationFiles(cfg config.Config) (*[]File, error) {
+func GetMigrationFiles(dir string) (*[]File, error) {
 	var migrationFiles []File
 
-	err := filepath.Walk(cfg.AbsoluteMigrationDir,
+	err := filepath.Walk(dir,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
