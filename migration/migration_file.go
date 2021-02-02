@@ -7,6 +7,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -20,6 +23,13 @@ type File struct {
 	Config     Config
 	Migrations []Migration
 }
+
+//Sort interface implementation
+type FilesBySequence []File
+
+func (f FilesBySequence) Len() int           { return len(f) }
+func (f FilesBySequence) Less(i, j int) bool { return f[i].Metadata.Sequence < f[j].Metadata.Sequence }
+func (f FilesBySequence) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
 
 func GetMigrationFiles(dir string) (*[]File, error) {
 	var migrationFiles []File
@@ -46,6 +56,15 @@ func GetMigrationFiles(dir string) (*[]File, error) {
 				return err
 			}
 
+			for _, file := range migrationFiles {
+				if migrationFile.Metadata.Sequence == file.Metadata.Sequence {
+					return fmt.Errorf("migration file '%s' and '%s' have the same sequence number (%d)",
+						filepath.Base(migrationFile.Metadata.FileName),
+						filepath.Base(file.Metadata.FileName),
+						file.Metadata.Sequence)
+				}
+			}
+
 			migrationFiles = append(migrationFiles, *migrationFile)
 
 			return nil
@@ -54,14 +73,21 @@ func GetMigrationFiles(dir string) (*[]File, error) {
 		return nil, err
 	}
 
+	sort.Sort(FilesBySequence(migrationFiles))
+
 	return &migrationFiles, err
 }
 
 func parseMigrationFile(filename string, source []byte) (*File, error) {
 	fileSha256 := fmt.Sprintf("%x", sha256.Sum256(source))
 
+	sequenceNumber, err := getSequenceNumberFromFilename(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get sequence number from migration filename: %s, err: %s", filename, err)
+	}
+
 	var f FileContent
-	err := hclsimple.Decode(filename, source, nil, &f)
+	err = hclsimple.Decode(filename, source, nil, &f)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode migration file: %s, err: %s", filename, err)
 	}
@@ -69,6 +95,7 @@ func parseMigrationFile(filename string, source []byte) (*File, error) {
 	var fileMeta = FileMetadata{
 		FileName: filename,
 		FileHash: fileSha256,
+		Sequence: sequenceNumber,
 	}
 
 	var migrations []Migration
@@ -110,4 +137,16 @@ func parseMigrationFile(filename string, source []byte) (*File, error) {
 	}
 
 	return &file, nil
+}
+
+func getSequenceNumberFromFilename(filename string) (int, error) {
+	regex := regexp.MustCompile(`V(?P<sequence>\d+)__`)
+	match := regex.FindStringSubmatch(filename)
+	result := make(map[string]string)
+	for i, name := range regex.SubexpNames() {
+		if i != 0 && name != "" {
+			result[name] = match[i]
+		}
+	}
+	return strconv.Atoi(result["sequence"])
 }

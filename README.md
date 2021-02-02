@@ -149,7 +149,8 @@ the config file.</br>
 Also notice the `prod` sub-command, this is telling tgmigrate to only apply migrations for the prod environment. </br>
 This means that the migration file above would be applied in this case, because it has `prod` in the environments list.
 
-###Example output
+### Example output
+
 ```
 2021/02/01 14:32:16 Downloading us-east-1/apis/rest/terraform.tfstate to /home/user/terragrunt/.tgmigrate_cache/state/us-east-1/apis/rest/terraform.tfstate
 2021/02/01 14:32:16 Downloading us-east-1/apis/rest_2/terraform.tfstate to /home/user/terragrunt/.tgmigrate_cache/state/us-east-1/apis/rest_2/terraform.tfstate
