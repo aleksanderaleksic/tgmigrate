@@ -28,11 +28,11 @@ type File struct {
 type FilesBySequence []File
 
 func (f FilesBySequence) Len() int           { return len(f) }
-func (f FilesBySequence) Less(i, j int) bool { return f[i].Metadata.Sequence < f[j].Metadata.Sequence }
+func (f FilesBySequence) Less(i, j int) bool { return f[i].Metadata.Version < f[j].Metadata.Version }
 func (f FilesBySequence) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
 
 func GetMigrationFiles(dir string) (*[]File, error) {
-	var migrationFiles []File
+	migrationFiles := make([]File, 0)
 
 	err := filepath.Walk(dir,
 		func(path string, info os.FileInfo, err error) error {
@@ -57,11 +57,11 @@ func GetMigrationFiles(dir string) (*[]File, error) {
 			}
 
 			for _, file := range migrationFiles {
-				if migrationFile.Metadata.Sequence == file.Metadata.Sequence {
-					return fmt.Errorf("migration file '%s' and '%s' have the same sequence number (%d)",
+				if migrationFile.Metadata.Version == file.Metadata.Version {
+					return fmt.Errorf("migration file '%s' and '%s' have the same version number (%d)",
 						filepath.Base(migrationFile.Metadata.FileName),
 						filepath.Base(file.Metadata.FileName),
-						file.Metadata.Sequence)
+						file.Metadata.Version)
 				}
 			}
 
@@ -95,7 +95,7 @@ func parseMigrationFile(filename string, source []byte) (*File, error) {
 	var fileMeta = FileMetadata{
 		FileName: filename,
 		FileHash: fileSha256,
-		Sequence: sequenceNumber,
+		Version:  sequenceNumber,
 	}
 
 	var migrations []Migration
@@ -142,6 +142,11 @@ func parseMigrationFile(filename string, source []byte) (*File, error) {
 func getSequenceNumberFromFilename(filename string) (int, error) {
 	regex := regexp.MustCompile(`V(?P<sequence>\d+)__`)
 	match := regex.FindStringSubmatch(filename)
+
+	if match == nil {
+		return -1, fmt.Errorf("missing version prefix on migration file: '%s'", filename)
+	}
+
 	result := make(map[string]string)
 	for i, name := range regex.SubexpNames() {
 		if i != 0 && name != "" {
