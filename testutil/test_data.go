@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const testDataDir = "data"
+const testDataDir = "../testutil/data"
 
 func CopyTestData(t *testing.T, dataSetName string, destination string) {
 	copyTestDataWithMode(t, dataSetName, destination, nil)
@@ -19,7 +19,7 @@ func CopyTestDataWithMode(t *testing.T, dataSetName string, destination string, 
 }
 
 func copyTestDataWithMode(t *testing.T, dataSetName string, destination string, mode *os.FileMode) {
-	datasetDir, err := filepath.Abs(filepath.Join("../testutil", testDataDir, dataSetName))
+	datasetDir, err := filepath.Abs(filepath.Join(testDataDir, dataSetName))
 	if err != nil {
 		t.Fatalf("failed to get path for dataset '%s'", dataSetName)
 	}

@@ -3,6 +3,7 @@ package migration
 import (
 	"crypto/sha256"
 	"fmt"
+	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"io/ioutil"
 	"os"
@@ -33,6 +34,10 @@ func (f FilesBySequence) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }
 
 func GetMigrationFiles(dir string) (*[]File, error) {
 	migrationFiles := make([]File, 0)
+
+	if !common.PathExist(dir) {
+		return &migrationFiles, nil
+	}
 
 	err := filepath.Walk(dir,
 		func(path string, info os.FileInfo, err error) error {

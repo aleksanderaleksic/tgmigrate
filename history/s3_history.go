@@ -23,7 +23,7 @@ func (h S3History) IsMigrationApplied(hash string) (*Result, error) {
 			return &m.Result, nil
 		}
 	}
-	return &Result{State: ResultStateUnapplied}, nil
+	return &UnappliedResult, nil
 }
 
 func (h *S3History) InitializeHistory() (*StorageHistory, error) {

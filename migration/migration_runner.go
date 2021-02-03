@@ -16,6 +16,9 @@ type Runner struct {
 }
 
 func (r Runner) Apply(environment *string) error {
+	defer r.HistoryInterface.Cleanup()
+	defer r.StateInterface.Cleanup()
+
 	_, err := r.HistoryInterface.InitializeHistory()
 	if err != nil {
 		return fmt.Errorf("unable to initialize history, error: %s", err)
@@ -29,9 +32,6 @@ func (r Runner) Apply(environment *string) error {
 	if err != nil {
 		return err
 	}
-
-	defer r.HistoryInterface.Cleanup()
-	defer r.StateInterface.Cleanup()
 
 	if len(*migrationsToBeApplied) == 0 {
 		fmt.Println("No migrations will be applied")
