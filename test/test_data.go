@@ -1,4 +1,4 @@
-package testutil
+package test
 
 import (
 	"io"
@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const testDataDir = "../testutil/data"
+const testDataDir = "../test/data"
 
 func CopyTestData(t *testing.T, dataSetName string, destination string) {
 	copyTestDataWithMode(t, dataSetName, destination, nil)

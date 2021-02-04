@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hashicorp/terraform-exec/tfexec"
+	"github.com/seqsense/s3sync"
 	"os/exec"
 	"path/filepath"
 )
@@ -50,13 +51,20 @@ func GetStateInterface(c config.Config, ctx common.Context, cache common.Cache) 
 			}
 		}
 
+		var syncManager *s3sync.Manager
+		if ctx.DryRun {
+			syncManager = s3sync.New(sess, s3sync.WithDryRun())
+		} else {
+			syncManager = s3sync.New(sess)
+		}
+
 		return &S3State{
 			context: ctx,
 			State:   c.State,
 			Sync: S3Sync{
-				config:  conf,
-				session: *sess,
-				cache:   cache,
+				config:      conf,
+				syncManager: *syncManager,
+				cache:       cache,
 			},
 			Terraform: nil,
 			Cache:     cache,

@@ -2,7 +2,7 @@ package config
 
 import (
 	"flag"
-	"github.com/aleksanderaleksic/tgmigrate/testutil"
+	"github.com/aleksanderaleksic/tgmigrate/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
 	"os"
@@ -36,7 +36,7 @@ func TestHandleErrorParsingConfig(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testutil.TestFile(t, confFilePath, `
+	test.TestFile(t, confFilePath, `
 migration {}
 `)
 	ctx := getContextWithConfigFIle(confFilePath)
@@ -52,7 +52,7 @@ func TestHandleErrorParsingInvalidHistoryStorageConfig(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testutil.TestFile(t, confFilePath, `
+	test.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -84,7 +84,7 @@ func TestHandleErrorParsingInvalidStateStorageConfig(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testutil.TestFile(t, confFilePath, `
+	test.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -136,7 +136,7 @@ func TestFindingConfigInParentFolder(t *testing.T) {
 		t.Fatal("Failed to change directory for test")
 	}
 
-	testutil.TestFile(t, confFilePath, `
+	test.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -172,7 +172,7 @@ func TestReadConfig(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testutil.TestFile(t, confFilePath, `
+	test.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 
@@ -234,7 +234,7 @@ func TestReadConfigWithVariables(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	confFilePath := filepath.Join(testDir, ".tgmigrate.hcl")
-	testutil.TestFile(t, confFilePath, `
+	test.TestFile(t, confFilePath, `
 migration {
   migration = "./migrations"
 

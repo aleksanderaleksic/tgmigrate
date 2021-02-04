@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"github.com/aleksanderaleksic/tgmigrate/testutil"
+	"github.com/aleksanderaleksic/tgmigrate/test"
 	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"testing"
@@ -19,7 +19,7 @@ func TestGetMigrationFilesFromEmptyDirectory(t *testing.T) {
 func TestHandleInvalidMigrationFilesError(t *testing.T) {
 	ass := assert.New(t)
 	testDir := t.TempDir()
-	testutil.CopyTestData(t, "empty_migration", testDir)
+	test.CopyTestData(t, "empty_migration", testDir)
 
 	files, err := GetMigrationFiles(filepath.Join(testDir, "migrations"))
 	ass.NotNil(err)
@@ -29,7 +29,7 @@ func TestHandleInvalidMigrationFilesError(t *testing.T) {
 func TestHandleInvalidMoveBlock(t *testing.T) {
 	ass := assert.New(t)
 	testDir := t.TempDir()
-	testutil.CopyTestData(t, "invalid_move_block", testDir)
+	test.CopyTestData(t, "invalid_move_block", testDir)
 
 	files, err := GetMigrationFiles(filepath.Join(testDir, "migrations"))
 	ass.NotNil(err)
@@ -39,7 +39,7 @@ func TestHandleInvalidMoveBlock(t *testing.T) {
 func TestHandleInvalidRemoveBlock(t *testing.T) {
 	ass := assert.New(t)
 	testDir := t.TempDir()
-	testutil.CopyTestData(t, "invalid_remove_block", testDir)
+	test.CopyTestData(t, "invalid_remove_block", testDir)
 
 	files, err := GetMigrationFiles(filepath.Join(testDir, "migrations"))
 	ass.NotNil(err)
@@ -49,7 +49,7 @@ func TestHandleInvalidRemoveBlock(t *testing.T) {
 func TestHandleMissingVersionPrefix(t *testing.T) {
 	ass := assert.New(t)
 	testDir := t.TempDir()
-	testutil.CopyTestData(t, "missing_version", testDir)
+	test.CopyTestData(t, "missing_version", testDir)
 
 	files, err := GetMigrationFiles(filepath.Join(testDir, "migrations"))
 	ass.NotNil(err)
@@ -59,7 +59,7 @@ func TestHandleMissingVersionPrefix(t *testing.T) {
 func TestHandleDuplicateVersionPrefix(t *testing.T) {
 	ass := assert.New(t)
 	testDir := t.TempDir()
-	testutil.CopyTestData(t, "duplicate_version", testDir)
+	test.CopyTestData(t, "duplicate_version", testDir)
 
 	files, err := GetMigrationFiles(filepath.Join(testDir, "migrations"))
 	ass.NotNil(err)
@@ -69,7 +69,7 @@ func TestHandleDuplicateVersionPrefix(t *testing.T) {
 func TestHandleFilePermissionDenied(t *testing.T) {
 	ass := assert.New(t)
 	testDir := t.TempDir()
-	testutil.CopyTestData(t, "duplicate_version", testDir)
+	test.CopyTestData(t, "duplicate_version", testDir)
 
 	files, err := GetMigrationFiles(filepath.Join(testDir, "migrations"))
 	ass.NotNil(err)
@@ -79,7 +79,7 @@ func TestHandleFilePermissionDenied(t *testing.T) {
 func TestValidMigration(t *testing.T) {
 	ass := assert.New(t)
 	testDir := t.TempDir()
-	testutil.CopyTestData(t, "simple", testDir)
+	test.CopyTestData(t, "simple", testDir)
 
 	f, err := GetMigrationFiles(filepath.Join(testDir, "migrations"))
 	ass.Nil(err)
