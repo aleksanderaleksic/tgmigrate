@@ -40,7 +40,7 @@ func TestShouldHandleInitializeHistoryError(t *testing.T) {
 			SkipUserInteraction: false,
 			DryRun:              false,
 		},
-		Config:           *conf,
+		Config:           conf,
 		HistoryInterface: mHistory,
 		StateInterface:   mState,
 	}
@@ -80,7 +80,7 @@ func TestShouldHandleNoMigrationFiles(t *testing.T) {
 			SkipUserInteraction: false,
 			DryRun:              false,
 		},
-		Config:           *conf,
+		Config:           conf,
 		HistoryInterface: mHistory,
 		StateInterface:   mState,
 	}
@@ -122,7 +122,7 @@ func TestShouldFailToApplyWithMoveCommandFailing(t *testing.T) {
 			SkipUserInteraction: false,
 			DryRun:              false,
 		},
-		Config:           *conf,
+		Config:           conf,
 		HistoryInterface: mHistory,
 		StateInterface:   mState,
 	}
@@ -203,7 +203,7 @@ func TestShouldFailToApplyWithRemoveCommandFailing(t *testing.T) {
 			SkipUserInteraction: false,
 			DryRun:              false,
 		},
-		Config:           *conf,
+		Config:           conf,
 		HistoryInterface: mHistory,
 		StateInterface:   mState,
 	}
@@ -293,7 +293,7 @@ func TestShouldApplyMigrations(t *testing.T) {
 			SkipUserInteraction: false,
 			DryRun:              false,
 		},
-		Config:           *conf,
+		Config:           conf,
 		HistoryInterface: mHistory,
 		StateInterface:   mState,
 	}
