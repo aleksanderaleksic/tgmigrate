@@ -10,27 +10,37 @@ import (
 
 const testDataDir = "../test/data"
 
+type ShouldCopyPredicate func(path string, file os.FileInfo) bool
+
 func CopyTestData(t *testing.T, dataSetName string, destination string) {
-	copyTestDataWithMode(t, dataSetName, destination, nil)
+	copyTestDataWithMode(t, dataSetName, destination, nil, defaultPredicate)
+}
+
+func CopyFilesWithPredicate(source string, destination string, shouldCopy ShouldCopyPredicate) error {
+	return copyFiles(source, destination, nil, shouldCopy)
 }
 
 func CopyTestDataWithMode(t *testing.T, dataSetName string, destination string, mode os.FileMode) {
-	copyTestDataWithMode(t, dataSetName, destination, &mode)
+	copyTestDataWithMode(t, dataSetName, destination, &mode, defaultPredicate)
 }
 
-func copyTestDataWithMode(t *testing.T, dataSetName string, destination string, mode *os.FileMode) {
+func defaultPredicate(path string, file os.FileInfo) bool {
+	return true
+}
+
+func copyTestDataWithMode(t *testing.T, dataSetName string, destination string, mode *os.FileMode, shouldCopy ShouldCopyPredicate) {
 	datasetDir, err := filepath.Abs(filepath.Join(testDataDir, dataSetName))
 	if err != nil {
 		t.Fatalf("failed to get path for dataset '%s'", dataSetName)
 	}
 
-	err = copyFiles(datasetDir, destination, mode)
+	err = copyFiles(datasetDir, destination, mode, shouldCopy)
 	if err != nil {
 		t.Fatalf("failed to copy dataset '%s' from '%s' to '%s', err: %s", dataSetName, datasetDir, destination, err)
 	}
 }
 
-func copyFiles(path string, dstPath string, fileMode *os.FileMode) error {
+func copyFiles(path string, dstPath string, fileMode *os.FileMode, shouldCopy ShouldCopyPredicate) error {
 	infos, err := ioutil.ReadDir(path)
 	if err != nil {
 		return err
@@ -50,14 +60,16 @@ func copyFiles(path string, dstPath string, fileMode *os.FileMode) error {
 			if err != nil {
 				return err
 			}
-			err = copyFiles(srcPath, newDir, fileMode)
+			err = copyFiles(srcPath, newDir, fileMode, shouldCopy)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = copyFile(srcPath, dstPath, mode)
-			if err != nil {
-				return err
+			if shouldCopy(srcPath, info) {
+				err = copyFile(srcPath, dstPath, mode)
+				if err != nil {
+					return err
+				}
 			}
 		}
 

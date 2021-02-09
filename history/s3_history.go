@@ -11,7 +11,8 @@ import (
 type S3History struct {
 	context         common.Context
 	S3StorageConfig config.S3HistoryStorageConfig
-	SyncManager     s3sync.Manager
+	safeSyncManager s3sync.Manager
+	syncManager     s3sync.Manager
 	StorageHistory  *StorageHistory
 	Cache           common.Cache
 }
@@ -28,7 +29,7 @@ func (h S3History) IsMigrationApplied(hash string) (*Result, error) {
 func (h *S3History) InitializeHistory() (*StorageHistory, error) {
 	historyPath := h.getHistoryStoragePath()
 
-	err := h.SyncManager.Sync("s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key, historyPath)
+	err := h.syncManager.Sync("s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key, historyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func (h *S3History) WriteToStorage() error {
 		return err
 	}
 
-	err = h.SyncManager.Sync(historyPath, "s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key)
+	err = h.safeSyncManager.Sync(historyPath, "s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key)
 
 	if err != nil {
 		return err

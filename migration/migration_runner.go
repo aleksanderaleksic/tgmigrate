@@ -10,7 +10,7 @@ import (
 
 type Runner struct {
 	Context          *common.Context
-	Config           config.Config
+	Config           *config.Config
 	HistoryInterface history.History
 	StateInterface   state.State
 }

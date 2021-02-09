@@ -3,6 +3,7 @@ package state
 import (
 	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/seqsense/s3sync"
 	"os"
 	"path/filepath"
@@ -10,13 +11,18 @@ import (
 )
 
 type S3Sync struct {
-	config      config.S3StateConfig
-	syncManager s3sync.Manager
-	cache       common.Cache
+	config          config.S3StateConfig
+	safeSyncManager s3sync.Manager
+	syncManager     s3sync.Manager
+	cache           common.Cache
 }
 
 func (s S3Sync) DownSync3State() error {
-	err := s.syncManager.Sync("s3://"+s.config.Bucket, getStateDirPath(s.cache))
+	var s3Prefix = s.config.Prefix
+	if s.config.Prefix == nil {
+		s3Prefix = aws.String("")
+	}
+	err := s.syncManager.Sync("s3://"+filepath.Join(s.config.Bucket, *s3Prefix), getStateDirPath(s.cache))
 	if err != nil {
 		return err
 	}
@@ -43,7 +49,12 @@ func (s S3Sync) UpSync3State() error {
 		return nil
 	})
 
-	err := s.syncManager.Sync(stateDirPath, "s3://"+s.config.Bucket)
+	var s3Prefix = s.config.Prefix
+	if s.config.Prefix == nil {
+		s3Prefix = aws.String("")
+	}
+
+	err := s.safeSyncManager.Sync(stateDirPath, "s3://"+filepath.Join(s.config.Bucket, *s3Prefix))
 	if err != nil {
 		return err
 	}

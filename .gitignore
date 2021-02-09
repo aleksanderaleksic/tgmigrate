@@ -110,3 +110,9 @@ modules.xml
 ### Go Patch ###
 /vendor/
 /Godeps/
+
+.terraform
+.terraform.lock.hcl
+
+**/e2e/**/terraform.tfstate
+**/e2e/**/test_file*.txt

@@ -51,20 +51,21 @@ func GetStateInterface(c config.Config, ctx common.Context, cache common.Cache) 
 			}
 		}
 
-		var syncManager *s3sync.Manager
+		var safeSyncManger *s3sync.Manager
 		if ctx.DryRun {
-			syncManager = s3sync.New(sess, s3sync.WithDryRun())
+			safeSyncManger = s3sync.New(sess, s3sync.WithDryRun())
 		} else {
-			syncManager = s3sync.New(sess)
+			safeSyncManger = s3sync.New(sess)
 		}
 
 		return &S3State{
 			context: ctx,
 			State:   c.State,
 			Sync: S3Sync{
-				config:      conf,
-				syncManager: *syncManager,
-				cache:       cache,
+				config:          conf,
+				syncManager:     *s3sync.New(sess),
+				safeSyncManager: *safeSyncManger,
+				cache:           cache,
 			},
 			Terraform: nil,
 			Cache:     cache,

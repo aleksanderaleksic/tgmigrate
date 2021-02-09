@@ -46,17 +46,18 @@ func GetHistoryInterface(c config.Config, ctx common.Context, cache common.Cache
 			}
 		}
 
-		var syncManager *s3sync.Manager
+		var safeSyncManager *s3sync.Manager
 		if ctx.DryRun {
-			syncManager = s3sync.New(sess, s3sync.WithDryRun())
+			safeSyncManager = s3sync.New(sess, s3sync.WithDryRun())
 		} else {
-			syncManager = s3sync.New(sess)
+			safeSyncManager = s3sync.New(sess)
 		}
 
 		return &S3History{
 			context:         ctx,
 			S3StorageConfig: *conf,
-			SyncManager:     *syncManager,
+			safeSyncManager: *safeSyncManager,
+			syncManager:     *s3sync.New(sess),
 			Cache:           cache,
 		}, nil
 	default:
