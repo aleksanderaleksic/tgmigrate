@@ -75,6 +75,7 @@ func (command *ApplyCommand) initialize(c *cli.Context) error {
 
 	runner := migration.Runner{
 		Context:          &ctx,
+		Config:           cfg,
 		HistoryInterface: historyInterface,
 		StateInterface:   stateInterface,
 	}

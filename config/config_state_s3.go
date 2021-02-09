@@ -8,6 +8,7 @@ import (
 type S3StateConfig struct {
 	Bucket        string  `hcl:"bucket"`
 	Region        string  `hcl:"region"`
+	Prefix        *string `hcl:"prefix,optional"`
 	StateFileName *string `hcl:"state_file_name,optional"`
 	AssumeRole    *string `hcl:"assume_role,optional"`
 }

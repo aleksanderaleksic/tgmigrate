@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-var defaultConfigFile = ".tgmigrate.hcl"
+const DefaultConfigFile = ".tgmigrate.hcl"
 
 type File struct {
 	Migration struct {
@@ -43,7 +43,7 @@ func GetConfigFile(ctx *cli.Context) (*Config, error) {
 	confFilePath := GetConfigFilePathFromFlags(ctx)
 	source, err := ioutil.ReadFile(confFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("unable to find %s in current or parrent directories, a config file is required", defaultConfigFile)
+		return nil, fmt.Errorf("unable to find %s in current or parrent directories, a config file is required", DefaultConfigFile)
 	}
 
 	hclContext := hcl.EvalContext{
@@ -143,7 +143,7 @@ func GetConfigFilePathFromFlags(c *cli.Context) string {
 
 	path, err := findFirstConfigFileInParentFolders()
 	if err != nil {
-		return defaultConfigFile
+		return DefaultConfigFile
 	}
 
 	return *path
@@ -165,7 +165,7 @@ func findFirstConfigFileInParentFolders() (*string, error) {
 			break
 		}
 
-		file := filepath.Join(basePath, defaultConfigFile)
+		file := filepath.Join(basePath, DefaultConfigFile)
 		if _, err := os.Stat(file); os.IsNotExist(err) {
 			//Going up a directory if no config file
 			basePath = filepath.Dir(basePath)
@@ -175,7 +175,9 @@ func findFirstConfigFileInParentFolders() (*string, error) {
 		return &file, nil
 	}
 
-	return &defaultConfigFile, nil
+	file := DefaultConfigFile
+
+	return &file, nil
 }
 
 func getConfigVariables(c *cli.Context) map[string]cty.Value {

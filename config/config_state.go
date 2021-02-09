@@ -1,6 +1,6 @@
 package config
 
-const defaultStateFileName = "terraform.tfstate"
+var defaultStateFileName = "terraform.tfstate"
 
 type State struct {
 	Type   string

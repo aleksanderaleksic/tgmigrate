@@ -3,7 +3,6 @@ package history
 import (
 	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/seqsense/s3sync"
 	"os"
 	"path/filepath"
@@ -12,7 +11,8 @@ import (
 type S3History struct {
 	context         common.Context
 	S3StorageConfig config.S3HistoryStorageConfig
-	session         session.Session
+	safeSyncManager s3sync.Manager
+	syncManager     s3sync.Manager
 	StorageHistory  *StorageHistory
 	Cache           common.Cache
 }
@@ -23,13 +23,13 @@ func (h S3History) IsMigrationApplied(hash string) (*Result, error) {
 			return &m.Result, nil
 		}
 	}
-	return &Result{State: ResultStateUnapplied}, nil
+	return &UnappliedResult, nil
 }
 
 func (h *S3History) InitializeHistory() (*StorageHistory, error) {
 	historyPath := h.getHistoryStoragePath()
 
-	err := s3sync.New(&h.session).Sync("s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key, historyPath)
+	err := h.syncManager.Sync("s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key, historyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -56,14 +56,7 @@ func (h *S3History) WriteToStorage() error {
 		return err
 	}
 
-	var syncManager *s3sync.Manager
-	if h.context.DryRun {
-		syncManager = s3sync.New(&h.session, s3sync.WithDryRun())
-	} else {
-		syncManager = s3sync.New(&h.session)
-	}
-
-	err = syncManager.Sync(historyPath, "s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key)
+	err = h.safeSyncManager.Sync(historyPath, "s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key)
 
 	if err != nil {
 		return err

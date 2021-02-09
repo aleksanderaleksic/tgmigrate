@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/seqsense/s3sync"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -44,10 +45,19 @@ func GetHistoryInterface(c config.Config, ctx common.Context, cache common.Cache
 				return nil, err
 			}
 		}
+
+		var safeSyncManager *s3sync.Manager
+		if ctx.DryRun {
+			safeSyncManager = s3sync.New(sess, s3sync.WithDryRun())
+		} else {
+			safeSyncManager = s3sync.New(sess)
+		}
+
 		return &S3History{
 			context:         ctx,
 			S3StorageConfig: *conf,
-			session:         *sess,
+			safeSyncManager: *safeSyncManager,
+			syncManager:     *s3sync.New(sess),
 			Cache:           cache,
 		}, nil
 	default:

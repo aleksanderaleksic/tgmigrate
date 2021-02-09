@@ -36,7 +36,7 @@ func (s *S3State) InitializeState() error {
 }
 
 func (s S3State) Complete() error {
-	err := s.Sync.UpSync3State(s.context.DryRun)
+	err := s.Sync.UpSync3State()
 	if err != nil {
 		return err
 	}

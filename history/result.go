@@ -17,7 +17,7 @@ var UnappliedResult = Result{
 }
 
 type Result struct {
-	State string
+	State string `json:"state"`
 }
 
 func (r Result) IsSuccess() bool {
