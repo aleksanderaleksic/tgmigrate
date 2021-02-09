@@ -34,10 +34,10 @@ func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
 }
 
 // IsMigrationApplied mocks base method
-func (m *MockHistory) IsMigrationApplied(hash string) (*history.Result, error) {
+func (m *MockHistory) IsMigrationApplied(hash string) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsMigrationApplied", hash)
-	ret0, _ := ret[0].(*history.Result)
+	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -64,15 +64,15 @@ func (mr *MockHistoryMockRecorder) InitializeHistory() *gomock.Call {
 }
 
 // StoreMigrationObject mocks base method
-func (m *MockHistory) StoreMigrationObject(migrationName string, result history.Result, fileHash string) {
+func (m *MockHistory) StoreMigrationObject(migrationName string, success bool, fileHash string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "StoreMigrationObject", migrationName, result, fileHash)
+	m.ctrl.Call(m, "StoreMigrationObject", migrationName, success, fileHash)
 }
 
 // StoreMigrationObject indicates an expected call of StoreMigrationObject
-func (mr *MockHistoryMockRecorder) StoreMigrationObject(migrationName, result, fileHash interface{}) *gomock.Call {
+func (mr *MockHistoryMockRecorder) StoreMigrationObject(migrationName, success, fileHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreMigrationObject", reflect.TypeOf((*MockHistory)(nil).StoreMigrationObject), migrationName, result, fileHash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreMigrationObject", reflect.TypeOf((*MockHistory)(nil).StoreMigrationObject), migrationName, success, fileHash)
 }
 
 // WriteToStorage mocks base method

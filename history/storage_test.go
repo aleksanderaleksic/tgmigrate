@@ -12,14 +12,15 @@ func TestDecodeEmptyStorageHistory(t *testing.T) {
 	source := []byte(`
 {
 	"schema_version": "v1",
-	"applied_migration": []
+	"applied_migration": [],
+	"failed_migration": []
 }
 `)
 
 	storageHistory, err := DecodeStorageHistory(source)
 	assert.Nil(t, err)
 	assert.Equal(t, "v1", storageHistory.SchemaVersion)
-	assert.Equal(t, []StorageHistoryObject{}, storageHistory.AppliedMigration)
+	assert.Equal(t, []AppliedStorageHistoryObject{}, storageHistory.AppliedMigration)
 }
 
 func TestDecodeStorageHistoryWithHistoryObject(t *testing.T) {
@@ -31,25 +32,22 @@ func TestDecodeStorageHistoryWithHistoryObject(t *testing.T) {
 			"schema_version": "v1",
 			"applied": "2021-01-02T15:04:05Z",
 			"hash": "sample_hash",
-			"name": "V1__move.hcl",
-			"result": {
-				"state": "success"
-			}
+			"name": "V1__move.hcl"
 		}
-	]
+	],
+	"failed_migration": []
 }
 `)
 
 	storageHistory, err := DecodeStorageHistory(source)
 	assert.Nil(t, err)
 	assert.Equal(t, "v1", storageHistory.SchemaVersion)
-	assert.Equal(t, []StorageHistoryObject{
+	assert.Equal(t, []AppliedStorageHistoryObject{
 		{
 			SchemaVersion: "v1",
 			Applied:       common.JSONTime(time.Date(2021, 1, 2, 15, 4, 5, 0, time.UTC)),
 			Hash:          "sample_hash",
 			Name:          "V1__move.hcl",
-			Result:        SuccessResult,
 		},
 	}, storageHistory.AppliedMigration)
 }
@@ -59,7 +57,8 @@ func TestEncodeEmptyStorageHistory(t *testing.T) {
 	expected := clearWhitespace(`
 {
 	"schema_version": "v1",
-	"applied_migration": []
+	"applied_migration": [],
+	"failed_migration": []
 }`)
 
 	output, err := EncodeStorageHistory(obj)
@@ -70,15 +69,15 @@ func TestEncodeEmptyStorageHistory(t *testing.T) {
 func TestEncodeStorageHistoryWithHistoryObject(t *testing.T) {
 	obj := StorageHistory{
 		SchemaVersion: "v1",
-		AppliedMigration: []StorageHistoryObject{
+		AppliedMigration: []AppliedStorageHistoryObject{
 			{
 				SchemaVersion: "v1",
 				Applied:       common.JSONTime(time.Date(2021, 1, 2, 15, 4, 5, 0, time.UTC)),
 				Hash:          "sample_hash",
 				Name:          "V1__move.hcl",
-				Result:        SuccessResult,
 			},
 		},
+		FailedMigrations: []FailedStorageHistoryObject{},
 	}
 	expected := clearWhitespace(`
 {
@@ -88,12 +87,10 @@ func TestEncodeStorageHistoryWithHistoryObject(t *testing.T) {
 			"schema_version": "v1",
 			"applied": "2021-01-02T15:04:05Z",
 			"hash": "sample_hash",
-			"name": "V1__move.hcl",
-			"result": {
-				"state": "success"
-			}
+			"name": "V1__move.hcl"
 		}
-	]
+	],
+	"failed_migration": []
 }
 `)
 

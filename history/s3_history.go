@@ -17,13 +17,13 @@ type S3History struct {
 	Cache           common.Cache
 }
 
-func (h S3History) IsMigrationApplied(hash string) (*Result, error) {
+func (h S3History) IsMigrationApplied(hash string) (bool, error) {
 	for _, m := range h.StorageHistory.AppliedMigration {
 		if m.Hash == hash {
-			return &m.Result, nil
+			return true, nil
 		}
 	}
-	return &UnappliedResult, nil
+	return false, nil
 }
 
 func (h *S3History) InitializeHistory() (*StorageHistory, error) {
@@ -44,8 +44,8 @@ func (h *S3History) InitializeHistory() (*StorageHistory, error) {
 	return h.StorageHistory, nil
 }
 
-func (h *S3History) StoreMigrationObject(migrationName string, result Result, fileHash string) {
-	storeMigrationObject(h.StorageHistory, migrationName, result, fileHash)
+func (h *S3History) StoreMigrationObject(migrationName string, success bool, fileHash string) {
+	storeMigrationObject(h.StorageHistory, migrationName, success, fileHash)
 }
 
 func (h *S3History) WriteToStorage() error {

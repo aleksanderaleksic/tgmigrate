@@ -151,7 +151,7 @@ func TestShouldFailToApplyWithMoveCommandFailing(t *testing.T) {
 	mHistory.EXPECT().
 		IsMigrationApplied(gomock.Any()).
 		Times(2).
-		Return(&history.UnappliedResult, nil)
+		Return(false, nil)
 
 	mState.EXPECT().
 		Move(state.ResourceContext{
@@ -165,7 +165,7 @@ func TestShouldFailToApplyWithMoveCommandFailing(t *testing.T) {
 		Return(false, fmt.Errorf("invalid resource address"))
 
 	mHistory.EXPECT().
-		StoreMigrationObject("V1__move.hcl", history.FailedResult, gomock.Any()).
+		StoreMigrationObject("V1__move.hcl", false, gomock.Any()).
 		Times(1)
 	mHistory.EXPECT().
 		WriteToStorage().
@@ -232,7 +232,7 @@ func TestShouldFailToApplyWithRemoveCommandFailing(t *testing.T) {
 	mHistory.EXPECT().
 		IsMigrationApplied(gomock.Any()).
 		Times(2).
-		Return(&history.UnappliedResult, nil)
+		Return(false, nil)
 
 	mState.EXPECT().
 		Move(state.ResourceContext{
@@ -254,10 +254,10 @@ func TestShouldFailToApplyWithRemoveCommandFailing(t *testing.T) {
 		Return(false, fmt.Errorf("invalid resource address"))
 
 	mHistory.EXPECT().
-		StoreMigrationObject("V1__move.hcl", history.SuccessResult, gomock.Any()).
+		StoreMigrationObject("V1__move.hcl", true, gomock.Any()).
 		Times(1)
 	mHistory.EXPECT().
-		StoreMigrationObject("V2__remove.hcl", history.FailedResult, gomock.Any()).
+		StoreMigrationObject("V2__remove.hcl", false, gomock.Any()).
 		Times(1)
 	mHistory.EXPECT().
 		WriteToStorage().
@@ -322,7 +322,7 @@ func TestShouldApplyMigrations(t *testing.T) {
 	mHistory.EXPECT().
 		IsMigrationApplied(gomock.Any()).
 		Times(2).
-		Return(&history.UnappliedResult, nil)
+		Return(false, nil)
 
 	mState.EXPECT().
 		Move(state.ResourceContext{
@@ -344,10 +344,10 @@ func TestShouldApplyMigrations(t *testing.T) {
 		Return(true, nil)
 
 	mHistory.EXPECT().
-		StoreMigrationObject("V1__move.hcl", history.SuccessResult, gomock.Any()).
+		StoreMigrationObject("V1__move.hcl", true, gomock.Any()).
 		Times(1)
 	mHistory.EXPECT().
-		StoreMigrationObject("V2__remove.hcl", history.SuccessResult, gomock.Any()).
+		StoreMigrationObject("V2__remove.hcl", true, gomock.Any()).
 		Times(1)
 	mHistory.EXPECT().
 		WriteToStorage().

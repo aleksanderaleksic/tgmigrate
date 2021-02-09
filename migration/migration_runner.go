@@ -99,9 +99,9 @@ func (r Runner) Apply(environment *string) error {
 		}
 
 		if isSuccess && migrationError == nil {
-			r.HistoryInterface.StoreMigrationObject(migrationFile.Metadata.FileName, history.SuccessResult, migrationFile.Metadata.FileHash)
+			r.HistoryInterface.StoreMigrationObject(migrationFile.Metadata.FileName, true, migrationFile.Metadata.FileHash)
 		} else {
-			r.HistoryInterface.StoreMigrationObject(migrationFile.Metadata.FileName, history.FailedResult, migrationFile.Metadata.FileHash)
+			r.HistoryInterface.StoreMigrationObject(migrationFile.Metadata.FileName, false, migrationFile.Metadata.FileHash)
 			_ = r.HistoryInterface.WriteToStorage()
 
 			return fmt.Errorf("failed to apply migrtaion '%s' '%s' \n with error: %s", migrationFile.Metadata.FileName, failingMigration, migrationError)
@@ -129,12 +129,12 @@ func (r Runner) getMigrationsToBeApplied(migrationFiles []File, environment *str
 			break
 		}
 
-		historyResult, err := r.HistoryInterface.IsMigrationApplied(migration.Metadata.FileHash)
+		isApplied, err := r.HistoryInterface.IsMigrationApplied(migration.Metadata.FileHash)
 		if err != nil {
 			return nil, err
 		}
 
-		if historyResult.IsUnapplied() || historyResult.IsFailure() {
+		if !isApplied {
 			migrationsToBeApplied = append(migrationsToBeApplied, migration)
 		}
 	}
