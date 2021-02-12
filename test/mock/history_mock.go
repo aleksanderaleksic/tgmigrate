@@ -87,6 +87,18 @@ func (mr *MockHistoryMockRecorder) StoreFailedMigration(migration interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreFailedMigration", reflect.TypeOf((*MockHistory)(nil).StoreFailedMigration), migration)
 }
 
+// RemoveAppliedMigration mocks base method
+func (m *MockHistory) RemoveAppliedMigration(migrationName string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RemoveAppliedMigration", migrationName)
+}
+
+// RemoveAppliedMigration indicates an expected call of RemoveAppliedMigration
+func (mr *MockHistoryMockRecorder) RemoveAppliedMigration(migrationName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveAppliedMigration", reflect.TypeOf((*MockHistory)(nil).RemoveAppliedMigration), migrationName)
+}
+
 // WriteToStorage mocks base method
 func (m *MockHistory) WriteToStorage() error {
 	m.ctrl.T.Helper()

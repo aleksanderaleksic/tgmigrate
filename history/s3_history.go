@@ -51,6 +51,14 @@ func (h S3History) StoreFailedMigration(migration *FailedStorageHistoryObject) {
 	h.StorageHistory.storeFailedMigration(migration)
 }
 
+func (h S3History) RemoveAppliedMigration(migrationName string) {
+	for index, migration := range h.StorageHistory.AppliedMigration {
+		if migration.Name == migrationName {
+			h.StorageHistory.AppliedMigration = append(h.StorageHistory.AppliedMigration[:index], h.StorageHistory.AppliedMigration[index+1:]...)
+		}
+	}
+}
+
 func (h *S3History) WriteToStorage() error {
 	historyPath := h.getHistoryStoragePath()
 
