@@ -32,7 +32,18 @@ func TestDecodeStorageHistoryWithHistoryObject(t *testing.T) {
 			"schema_version": "v1",
 			"applied": "2021-01-02T15:04:05Z",
 			"hash": "sample_hash",
-			"name": "V1__move.hcl"
+			"name": "V1__move.hcl",
+			"metadata": {
+				"schema_version": "v1",
+				"type": "s3",
+				"changed_objects": [
+					{
+						"key": "file1/terraform.tfstate",
+						"from_version_id": null,
+						"to_version_id": "d37ff0e71c144cabf5449ec442580c4a"
+					}
+				]
+			}
 		}
 	],
 	"failed_migration": []
@@ -48,6 +59,17 @@ func TestDecodeStorageHistoryWithHistoryObject(t *testing.T) {
 			Applied:       common.JSONTime(time.Date(2021, 1, 2, 15, 4, 5, 0, time.UTC)),
 			Hash:          "sample_hash",
 			Name:          "V1__move.hcl",
+			Metadata: *StorageS3Metadata{
+				SchemaVersion: "v1",
+				Type:          "s3",
+				ChangedObjects: []ChangedS3Object{
+					{
+						Key:           "file1/terraform.tfstate",
+						FromVersionId: nil,
+						ToVersionId:   "d37ff0e71c144cabf5449ec442580c4a",
+					},
+				},
+			}.Wrap(),
 		},
 	}, storageHistory.AppliedMigration)
 }
@@ -67,6 +89,18 @@ func TestEncodeEmptyStorageHistory(t *testing.T) {
 }
 
 func TestEncodeStorageHistoryWithHistoryObject(t *testing.T) {
+	metadata := StorageS3Metadata{
+		SchemaVersion: "v1",
+		Type:          "s3",
+		ChangedObjects: []ChangedS3Object{
+			{
+				Key:           "file1/terraform.tfstate",
+				FromVersionId: nil,
+				ToVersionId:   "d37ff0e71c144cabf5449ec442580c4a",
+			},
+		},
+	}.Wrap()
+
 	obj := StorageHistory{
 		SchemaVersion: "v1",
 		AppliedMigration: []AppliedStorageHistoryObject{
@@ -75,6 +109,7 @@ func TestEncodeStorageHistoryWithHistoryObject(t *testing.T) {
 				Applied:       common.JSONTime(time.Date(2021, 1, 2, 15, 4, 5, 0, time.UTC)),
 				Hash:          "sample_hash",
 				Name:          "V1__move.hcl",
+				Metadata:      *metadata,
 			},
 		},
 		FailedMigrations: []FailedStorageHistoryObject{},
@@ -87,7 +122,18 @@ func TestEncodeStorageHistoryWithHistoryObject(t *testing.T) {
 			"schema_version": "v1",
 			"applied": "2021-01-02T15:04:05Z",
 			"hash": "sample_hash",
-			"name": "V1__move.hcl"
+			"name": "V1__move.hcl",
+			"metadata": {
+				"schema_version": "v1",
+				"type": "s3",
+				"changed_objects": [
+					{
+						"key": "file1/terraform.tfstate",
+						"from_version_id": null,
+						"to_version_id": "d37ff0e71c144cabf5449ec442580c4a"
+					}
+				]
+			}
 		}
 	],
 	"failed_migration": []

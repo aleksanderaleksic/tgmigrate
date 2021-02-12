@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
+	"github.com/aleksanderaleksic/tgmigrate/history"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/terraform-exec/tfexec"
 	"github.com/seqsense/s3sync"
 	"os/exec"
@@ -21,7 +23,7 @@ type ResourceContext struct {
 
 type State interface {
 	InitializeState() error
-	Complete() error
+	Complete() (*history.MetadataWrapper, error)
 	Move(from ResourceContext, to ResourceContext) (bool, error)
 	Remove(resource ResourceContext) (bool, error)
 	Cleanup()
@@ -60,7 +62,8 @@ func GetStateInterface(c config.Config, ctx common.Context, cache common.Cache) 
 
 		return &S3State{
 			context: ctx,
-			State:   c.State,
+			State:   conf,
+			S3:      s3.New(sess),
 			Sync: S3Sync{
 				config:          conf,
 				syncManager:     *s3sync.New(sess),

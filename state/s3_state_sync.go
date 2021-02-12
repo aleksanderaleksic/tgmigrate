@@ -17,12 +17,17 @@ type S3Sync struct {
 	cache           common.Cache
 }
 
-func (s S3Sync) DownSync3State() error {
+func (s S3Sync) S3Path() string {
 	var s3Prefix = s.config.Prefix
 	if s.config.Prefix == nil {
 		s3Prefix = aws.String("")
 	}
-	err := s.syncManager.Sync("s3://"+filepath.Join(s.config.Bucket, *s3Prefix), getStateDirPath(s.cache))
+	return filepath.Join(s.config.Bucket, *s3Prefix)
+}
+
+func (s S3Sync) DownSync3State() error {
+
+	err := s.syncManager.Sync("s3://"+s.S3Path(), getStateDirPath(s.cache))
 	if err != nil {
 		return err
 	}
@@ -49,12 +54,7 @@ func (s S3Sync) UpSync3State() error {
 		return nil
 	})
 
-	var s3Prefix = s.config.Prefix
-	if s.config.Prefix == nil {
-		s3Prefix = aws.String("")
-	}
-
-	err := s.safeSyncManager.Sync(stateDirPath, "s3://"+filepath.Join(s.config.Bucket, *s3Prefix))
+	err := s.safeSyncManager.Sync(stateDirPath, "s3://"+s.S3Path())
 	if err != nil {
 		return err
 	}

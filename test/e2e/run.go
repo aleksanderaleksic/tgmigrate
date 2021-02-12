@@ -3,6 +3,7 @@ package e2e
 import (
 	"context"
 	"fmt"
+	"github.com/aleksanderaleksic/tgmigrate/history"
 	"github.com/aleksanderaleksic/tgmigrate/test"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-exec/tfexec"
 	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/seqsense/s3sync"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,10 +23,18 @@ import (
 const stateBasePath = "../data/e2e/state"
 const bucketName = "tgmigrate-e2e-test-bucket"
 
+type AfterTestCallback func(
+	t *testing.T,
+	testId string,
+	beforeState map[string]*tfjson.State,
+	afterState map[string]*tfjson.State,
+	afterHistory *history.StorageHistory,
+) error
+
 func RunE2E(
 	t *testing.T,
 	run func(t *testing.T, testId string) error,
-	after func(t *testing.T, testId string, beforeState map[string]*tfjson.State, afterState map[string]*tfjson.State) error,
+	after AfterTestCallback,
 ) error {
 	fmt.Printf("Initializing test\n")
 	testId, _ := uuid.GenerateUUID()
@@ -51,8 +61,12 @@ func RunE2E(
 		return err
 	}
 
-	remoteState, err := getRemoteState(t, sess, testId)
-	if err := after(t, testId, beforeStates, remoteState); err != nil {
+	remoteState, hist, err := getRemoteState(t, sess, testId)
+	if err != nil {
+		return err
+	}
+
+	if err := after(t, testId, beforeStates, remoteState, hist); err != nil {
 		return err
 	}
 
@@ -161,13 +175,13 @@ func clearTestStateFromBucket(sess *session.Session, testId string) error {
 	return nil
 }
 
-func getRemoteState(t *testing.T, session *session.Session, testId string) (map[string]*tfjson.State, error) {
+func getRemoteState(t *testing.T, session *session.Session, testId string) (map[string]*tfjson.State, *history.StorageHistory, error) {
 	dir := t.TempDir()
 	destinationPath := filepath.Join(dir, "after")
 	if err := test.CopyFilesWithPredicate(stateBasePath, destinationPath, func(path string, file os.FileInfo) bool {
 		return true
 	}); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err := filepath.Walk(destinationPath, func(path string, info os.FileInfo, err error) error {
@@ -181,7 +195,7 @@ func getRemoteState(t *testing.T, session *session.Session, testId string) (map[
 
 	manager := s3sync.New(session)
 	if err := manager.Sync("s3://"+filepath.Join(bucketName, testId), destinationPath); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var states = make(map[string]*tfjson.State, 0)
@@ -197,10 +211,20 @@ func getRemoteState(t *testing.T, session *session.Session, testId string) (map[
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return states, nil
+	historyFileSource, err := ioutil.ReadFile(filepath.Join(destinationPath, "tgmigrate/history.json"))
+	if err != nil {
+		return states, nil, nil
+	}
+
+	h, err := history.DecodeStorageHistory(historyFileSource)
+	if err != nil {
+		return states, nil, err
+	}
+
+	return states, h, nil
 }
 
 func getLocalState(stateDir string) (*tfjson.State, error) {

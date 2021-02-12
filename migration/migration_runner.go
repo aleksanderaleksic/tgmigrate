@@ -98,24 +98,33 @@ func (r Runner) Apply(environment *string) error {
 			}
 		}
 
-		if isSuccess && migrationError == nil {
-			r.HistoryInterface.StoreMigrationObject(migrationFile.Metadata.FileName, true, migrationFile.Metadata.FileHash)
-		} else {
-			r.HistoryInterface.StoreMigrationObject(migrationFile.Metadata.FileName, false, migrationFile.Metadata.FileHash)
+		if !isSuccess && migrationError != nil {
+			r.HistoryInterface.StoreFailedMigration(&history.FailedStorageHistoryObject{
+				SchemaVersion: history.StorageHistoryObjectVersion,
+				Hash:          migrationFile.Metadata.FileHash,
+				Name:          migrationFile.Metadata.FileName,
+			})
 			_ = r.HistoryInterface.WriteToStorage()
 
 			return fmt.Errorf("failed to apply migrtaion '%s' '%s' \n with error: %s", migrationFile.Metadata.FileName, failingMigration, migrationError)
 		}
-	}
 
-	err = r.HistoryInterface.WriteToStorage()
-	if err != nil {
-		return err
-	}
+		metadata, err := r.StateInterface.Complete()
+		if err != nil {
+			return err
+		}
 
-	err = r.StateInterface.Complete()
-	if err != nil {
-		return err
+		r.HistoryInterface.StoreAppliedMigration(&history.AppliedStorageHistoryObject{
+			SchemaVersion: history.StorageHistoryObjectVersion,
+			Hash:          migrationFile.Metadata.FileHash,
+			Name:          migrationFile.Metadata.FileName,
+			Metadata:      *metadata,
+		})
+
+		err = r.HistoryInterface.WriteToStorage()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -126,7 +135,7 @@ func (r Runner) getMigrationsToBeApplied(migrationFiles []File, environment *str
 
 	for _, migration := range migrationFiles {
 		if environment != nil && !common.StringListContains(migration.Config.Environments, *environment) {
-			break
+			continue
 		}
 
 		isApplied, err := r.HistoryInterface.IsMigrationApplied(migration.Metadata.FileHash)

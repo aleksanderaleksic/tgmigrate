@@ -5,6 +5,7 @@
 package mock
 
 import (
+	history "github.com/aleksanderaleksic/tgmigrate/history"
 	state "github.com/aleksanderaleksic/tgmigrate/state"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -48,11 +49,12 @@ func (mr *MockStateMockRecorder) InitializeState() *gomock.Call {
 }
 
 // Complete mocks base method
-func (m *MockState) Complete() error {
+func (m *MockState) Complete() (*history.MetadataWrapper, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Complete")
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*history.MetadataWrapper)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Complete indicates an expected call of Complete

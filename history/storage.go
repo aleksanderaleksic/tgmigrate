@@ -19,6 +19,7 @@ type AppliedStorageHistoryObject struct {
 	Applied       common.JSONTime `json:"applied"`
 	Hash          string          `json:"hash"`
 	Name          string          `json:"name"`
+	Metadata      MetadataWrapper `json:"metadata"`
 }
 
 type FailedStorageHistoryObject struct {
@@ -26,10 +27,6 @@ type FailedStorageHistoryObject struct {
 	Failed        common.JSONTime `json:"applied"`
 	Hash          string          `json:"hash"`
 	Name          string          `json:"name"`
-}
-
-type StorageMetadata interface {
-	GetStorageMetadata() interface{}
 }
 
 func EmptyStorageHistory() StorageHistory {

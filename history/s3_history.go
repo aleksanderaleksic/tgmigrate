@@ -28,8 +28,8 @@ func (h S3History) IsMigrationApplied(hash string) (bool, error) {
 
 func (h *S3History) InitializeHistory() (*StorageHistory, error) {
 	historyPath := h.getHistoryStoragePath()
-
-	err := h.syncManager.Sync("s3://"+h.S3StorageConfig.Bucket+"/"+h.S3StorageConfig.Key, historyPath)
+	s3Path := "s3://" + filepath.Join(h.S3StorageConfig.Bucket, filepath.Dir(h.S3StorageConfig.Key))
+	err := h.syncManager.Sync(s3Path, filepath.Dir(historyPath))
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +44,11 @@ func (h *S3History) InitializeHistory() (*StorageHistory, error) {
 	return h.StorageHistory, nil
 }
 
-func (h *S3History) StoreMigrationObject(migrationName string, success bool, fileHash string) {
-	storeMigrationObject(h.StorageHistory, migrationName, success, fileHash)
+func (h S3History) StoreAppliedMigration(migration *AppliedStorageHistoryObject) {
+	h.StorageHistory.storeAppliedMigration(migration)
+}
+func (h S3History) StoreFailedMigration(migration *FailedStorageHistoryObject) {
+	h.StorageHistory.storeFailedMigration(migration)
 }
 
 func (h *S3History) WriteToStorage() error {
