@@ -1,6 +1,6 @@
 migration {
   environments = [
-    "test"
+    "run1"
   ]
   description = <<EOF
     - Remove testfile from files module

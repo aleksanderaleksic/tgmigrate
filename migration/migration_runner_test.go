@@ -1,15 +1,17 @@
 package migration
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"github.com/aleksanderaleksic/tgmigrate/common"
 	"github.com/aleksanderaleksic/tgmigrate/config"
-	"github.com/aleksanderaleksic/tgmigrate/history"
+	history "github.com/aleksanderaleksic/tgmigrate/history"
 	"github.com/aleksanderaleksic/tgmigrate/state"
 	. "github.com/aleksanderaleksic/tgmigrate/test"
 	. "github.com/aleksanderaleksic/tgmigrate/test/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 )
@@ -20,6 +22,15 @@ func getMocks(t *testing.T) (*gomock.Controller, *MockHistory, *MockState) {
 	mHistory := NewMockHistory(ctrl)
 	mState := NewMockState(ctrl)
 	return ctrl, mHistory, mState
+}
+
+func migrationFileHash(path string) string {
+	source, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Printf("Failed to get file hash for: %s", path)
+		return ""
+	}
+	return fmt.Sprintf("%x", sha256.Sum256(source))
 }
 
 func TestShouldHandleInitializeHistoryError(t *testing.T) {
@@ -151,7 +162,7 @@ func TestShouldFailToApplyWithMoveCommandFailing(t *testing.T) {
 	mHistory.EXPECT().
 		IsMigrationApplied(gomock.Any()).
 		Times(2).
-		Return(&history.UnappliedResult, nil)
+		Return(false, nil)
 
 	mState.EXPECT().
 		Move(state.ResourceContext{
@@ -165,7 +176,11 @@ func TestShouldFailToApplyWithMoveCommandFailing(t *testing.T) {
 		Return(false, fmt.Errorf("invalid resource address"))
 
 	mHistory.EXPECT().
-		StoreMigrationObject("V1__move.hcl", history.FailedResult, gomock.Any()).
+		StoreFailedMigration(&history.FailedStorageHistoryObject{
+			SchemaVersion: history.StorageHistoryObjectVersion,
+			Hash:          migrationFileHash(filepath.Join(testDir, "migrations", "V1__move.hcl")),
+			Name:          "V1__move.hcl",
+		}).
 		Times(1)
 	mHistory.EXPECT().
 		WriteToStorage().
@@ -232,7 +247,7 @@ func TestShouldFailToApplyWithRemoveCommandFailing(t *testing.T) {
 	mHistory.EXPECT().
 		IsMigrationApplied(gomock.Any()).
 		Times(2).
-		Return(&history.UnappliedResult, nil)
+		Return(false, nil)
 
 	mState.EXPECT().
 		Move(state.ResourceContext{
@@ -253,16 +268,46 @@ func TestShouldFailToApplyWithRemoveCommandFailing(t *testing.T) {
 		Times(1).
 		Return(false, fmt.Errorf("invalid resource address"))
 
+	s3HistoryMetadata := *history.StorageS3Metadata{
+		SchemaVersion: "v1",
+		ChangedObjects: []history.ChangedS3Object{
+			{
+				Key:           "us-east-1/apis/rest",
+				FromVersionId: nil,
+				ToVersionId:   "c1ce6dec475dcec2aa8c85ca1397465c",
+			},
+			{
+				Key:           "us-east-1/apis/rest_v2",
+				FromVersionId: nil,
+				ToVersionId:   "c1ce6dec475dcec2aa8c85ca1397465c",
+			},
+		},
+	}.Wrap()
+
 	mHistory.EXPECT().
-		StoreMigrationObject("V1__move.hcl", history.SuccessResult, gomock.Any()).
+		StoreAppliedMigration(&history.AppliedStorageHistoryObject{
+			SchemaVersion: history.StorageHistoryObjectVersion,
+			Hash:          migrationFileHash(filepath.Join(testDir, "migrations", "V1__move.hcl")),
+			Name:          "V1__move.hcl",
+			Metadata:      s3HistoryMetadata,
+		}).
 		Times(1)
 	mHistory.EXPECT().
-		StoreMigrationObject("V2__remove.hcl", history.FailedResult, gomock.Any()).
+		StoreFailedMigration(&history.FailedStorageHistoryObject{
+			SchemaVersion: history.StorageHistoryObjectVersion,
+			Hash:          migrationFileHash(filepath.Join(testDir, "migrations", "V2__remove.hcl")),
+			Name:          "V2__remove.hcl",
+		}).
 		Times(1)
 	mHistory.EXPECT().
 		WriteToStorage().
-		Times(1).
+		Times(2).
 		Return(nil)
+
+	mState.EXPECT().
+		Complete().
+		Times(1).
+		Return(&s3HistoryMetadata, nil)
 
 	err := run.Apply(nil)
 	assert.EqualError(t, err, fmt.Sprintf("failed to apply migrtaion '%s' '%s' \n with error: %s",
@@ -322,7 +367,7 @@ func TestShouldApplyMigrations(t *testing.T) {
 	mHistory.EXPECT().
 		IsMigrationApplied(gomock.Any()).
 		Times(2).
-		Return(&history.UnappliedResult, nil)
+		Return(false, nil)
 
 	mState.EXPECT().
 		Move(state.ResourceContext{
@@ -343,20 +388,65 @@ func TestShouldApplyMigrations(t *testing.T) {
 		Times(1).
 		Return(true, nil)
 
+	s3MoveHistoryMetadata := *history.StorageS3Metadata{
+		SchemaVersion: "v1",
+		Type:          "s3",
+		ChangedObjects: []history.ChangedS3Object{
+			{
+				Key:           "us-east-1/apis/rest",
+				FromVersionId: nil,
+				ToVersionId:   "c1ce6dec475dcec2aa8c85ca1397465c",
+			},
+			{
+				Key:           "us-east-1/apis/rest_v2",
+				FromVersionId: nil,
+				ToVersionId:   "c1ce6dec475dcec2aa8c85ca1397465c",
+			},
+		},
+	}.Wrap()
+
+	s3RemoveHistoryMetadata := *history.StorageS3Metadata{
+		SchemaVersion: "v1",
+		Type:          "s3",
+		ChangedObjects: []history.ChangedS3Object{
+			{
+				Key:           "us-east-1/files",
+				FromVersionId: nil,
+				ToVersionId:   "c1ce6dec475dcec2aa8c85ca1397465c",
+			},
+		},
+	}.Wrap()
+
 	mHistory.EXPECT().
-		StoreMigrationObject("V1__move.hcl", history.SuccessResult, gomock.Any()).
+		StoreAppliedMigration(&history.AppliedStorageHistoryObject{
+			SchemaVersion: history.StorageHistoryObjectVersion,
+			Hash:          migrationFileHash(filepath.Join(testDir, "migrations", "V1__move.hcl")),
+			Name:          "V1__move.hcl",
+			Metadata:      s3MoveHistoryMetadata,
+		}).
 		Times(1)
 	mHistory.EXPECT().
-		StoreMigrationObject("V2__remove.hcl", history.SuccessResult, gomock.Any()).
+		StoreAppliedMigration(&history.AppliedStorageHistoryObject{
+			SchemaVersion: history.StorageHistoryObjectVersion,
+			Hash:          migrationFileHash(filepath.Join(testDir, "migrations", "V2__remove.hcl")),
+			Name:          "V2__remove.hcl",
+			Metadata:      s3RemoveHistoryMetadata,
+		}).
 		Times(1)
 	mHistory.EXPECT().
 		WriteToStorage().
-		Times(1).
+		Times(2).
 		Return(nil)
+
 	mState.EXPECT().
 		Complete().
 		Times(1).
-		Return(nil)
+		Return(&s3MoveHistoryMetadata, nil)
+
+	mState.EXPECT().
+		Complete().
+		Times(1).
+		Return(&s3RemoveHistoryMetadata, nil)
 
 	err := run.Apply(nil)
 	assert.Nil(t, err)

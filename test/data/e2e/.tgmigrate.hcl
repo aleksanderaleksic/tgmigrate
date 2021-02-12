@@ -5,7 +5,7 @@ migration {
     storage "s3" {
       bucket = "tgmigrate-e2e-test-bucket"
       region = "eu-central-1"
-      key = "${TEST_ID}/history.json"
+      key = "${TEST_ID}/tgmigrate/history.json"
     }
   }
 

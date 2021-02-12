@@ -1,20 +1,20 @@
 migration {
   environments = [
-    "run1"
+    "run2"
   ]
   description = <<EOF
-    - Move file between modules
+    - Revert v1 migration
 EOF
 }
 
-migrate "move" "file_from_file1_to_file2" {
+migrate "move" "file_from_file2_to_file1" {
   from {
-    state = "file1"
+    state = "file2"
     resource = "local_file.test_file"
   }
 
   to {
-    state = "file2"
+    state = "file1"
     resource = "local_file.test_file"
   }
 }

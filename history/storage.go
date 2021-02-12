@@ -9,22 +9,31 @@ const StorageHistoryVersion = "v1"
 const StorageHistoryObjectVersion = "v1"
 
 type StorageHistory struct {
-	SchemaVersion    string                 `json:"schema_version"`
-	AppliedMigration []StorageHistoryObject `json:"applied_migration"`
+	SchemaVersion    string                        `json:"schema_version"`
+	AppliedMigration []AppliedStorageHistoryObject `json:"applied_migration"`
+	FailedMigrations []FailedStorageHistoryObject  `json:"failed_migration"`
 }
 
-type StorageHistoryObject struct {
+type AppliedStorageHistoryObject struct {
 	SchemaVersion string          `json:"schema_version"`
 	Applied       common.JSONTime `json:"applied"`
 	Hash          string          `json:"hash"`
 	Name          string          `json:"name"`
-	Result        Result          `json:"result"`
+	Metadata      MetadataWrapper `json:"metadata"`
+}
+
+type FailedStorageHistoryObject struct {
+	SchemaVersion string          `json:"schema_version"`
+	Failed        common.JSONTime `json:"applied"`
+	Hash          string          `json:"hash"`
+	Name          string          `json:"name"`
 }
 
 func EmptyStorageHistory() StorageHistory {
 	return StorageHistory{
 		SchemaVersion:    StorageHistoryVersion,
-		AppliedMigration: []StorageHistoryObject{},
+		AppliedMigration: []AppliedStorageHistoryObject{},
+		FailedMigrations: []FailedStorageHistoryObject{},
 	}
 }
 

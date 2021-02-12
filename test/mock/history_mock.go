@@ -34,10 +34,10 @@ func (m *MockHistory) EXPECT() *MockHistoryMockRecorder {
 }
 
 // IsMigrationApplied mocks base method
-func (m *MockHistory) IsMigrationApplied(hash string) (*history.Result, error) {
+func (m *MockHistory) IsMigrationApplied(hash string) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsMigrationApplied", hash)
-	ret0, _ := ret[0].(*history.Result)
+	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -63,16 +63,28 @@ func (mr *MockHistoryMockRecorder) InitializeHistory() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializeHistory", reflect.TypeOf((*MockHistory)(nil).InitializeHistory))
 }
 
-// StoreMigrationObject mocks base method
-func (m *MockHistory) StoreMigrationObject(migrationName string, result history.Result, fileHash string) {
+// StoreAppliedMigration mocks base method
+func (m *MockHistory) StoreAppliedMigration(migration *history.AppliedStorageHistoryObject) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "StoreMigrationObject", migrationName, result, fileHash)
+	m.ctrl.Call(m, "StoreAppliedMigration", migration)
 }
 
-// StoreMigrationObject indicates an expected call of StoreMigrationObject
-func (mr *MockHistoryMockRecorder) StoreMigrationObject(migrationName, result, fileHash interface{}) *gomock.Call {
+// StoreAppliedMigration indicates an expected call of StoreAppliedMigration
+func (mr *MockHistoryMockRecorder) StoreAppliedMigration(migration interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreMigrationObject", reflect.TypeOf((*MockHistory)(nil).StoreMigrationObject), migrationName, result, fileHash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreAppliedMigration", reflect.TypeOf((*MockHistory)(nil).StoreAppliedMigration), migration)
+}
+
+// StoreFailedMigration mocks base method
+func (m *MockHistory) StoreFailedMigration(migration *history.FailedStorageHistoryObject) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StoreFailedMigration", migration)
+}
+
+// StoreFailedMigration indicates an expected call of StoreFailedMigration
+func (mr *MockHistoryMockRecorder) StoreFailedMigration(migration interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreFailedMigration", reflect.TypeOf((*MockHistory)(nil).StoreFailedMigration), migration)
 }
 
 // WriteToStorage mocks base method

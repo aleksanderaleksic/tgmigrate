@@ -15,9 +15,10 @@ import (
 )
 
 type History interface {
-	IsMigrationApplied(hash string) (*Result, error)
+	IsMigrationApplied(hash string) (bool, error)
 	InitializeHistory() (*StorageHistory, error)
-	StoreMigrationObject(migrationName string, result Result, fileHash string)
+	StoreAppliedMigration(migration *AppliedStorageHistoryObject)
+	StoreFailedMigration(migration *FailedStorageHistoryObject)
 	WriteToStorage() error
 	Cleanup()
 }
@@ -120,14 +121,13 @@ func getOrCreateNewHistoryFile(historyPath string, skipUserInteraction bool) (*S
 	}
 }
 
-func storeMigrationObject(storageHistory *StorageHistory, migrationName string, result Result, fileHash string) {
-	storageHistory.AppliedMigration = append(storageHistory.AppliedMigration, StorageHistoryObject{
-		SchemaVersion: StorageHistoryObjectVersion,
-		Applied:       common.JSONTime(time.Now()),
-		Hash:          fileHash,
-		Name:          migrationName,
-		Result:        result,
-	})
+func (s *StorageHistory) storeAppliedMigration(migration *AppliedStorageHistoryObject) {
+	migration.Applied = common.JSONTime(time.Now())
+	s.AppliedMigration = append(s.AppliedMigration, *migration)
+}
+func (s *StorageHistory) storeFailedMigration(migration *FailedStorageHistoryObject) {
+	migration.Failed = common.JSONTime(time.Now())
+	s.FailedMigrations = append(s.FailedMigrations, *migration)
 }
 
 func writeToStorage(historyPath string, storageHistory StorageHistory) error {

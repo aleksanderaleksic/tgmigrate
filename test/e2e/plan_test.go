@@ -3,13 +3,13 @@ package e2e
 import (
 	"fmt"
 	"github.com/aleksanderaleksic/tgmigrate/command"
+	"github.com/aleksanderaleksic/tgmigrate/history"
 	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestPlanCommand(t *testing.T) {
-	t.Parallel()
 	err := RunE2E(t, func(t *testing.T, testId string) error {
 		app := command.GetApp()
 
@@ -19,7 +19,7 @@ func TestPlanCommand(t *testing.T) {
 			"-config=../data/e2e/.tgmigrate.hcl",
 			fmt.Sprintf("-config-variables=TEST_ID=%s", testId),
 			"plan",
-			"test",
+			"run1",
 		}
 
 		if err := app.Run(args); err != nil {
@@ -27,7 +27,7 @@ func TestPlanCommand(t *testing.T) {
 		}
 
 		return nil
-	}, func(t *testing.T, testId string, beforeState map[string]*tfjson.State, afterState map[string]*tfjson.State) error {
+	}, func(t *testing.T, testId string, beforeState map[string]*tfjson.State, afterState map[string]*tfjson.State, afterHistory *history.StorageHistory) error {
 		assert.Equal(t, beforeState, afterState)
 		return nil
 	})
@@ -38,7 +38,6 @@ func TestPlanCommand(t *testing.T) {
 }
 
 func TestPlanCommandWithoutMigrationFiles(t *testing.T) {
-	t.Parallel()
 	err := RunE2E(t, func(t *testing.T, testId string) error {
 		app := command.GetApp()
 
@@ -56,7 +55,7 @@ func TestPlanCommandWithoutMigrationFiles(t *testing.T) {
 		}
 
 		return nil
-	}, func(t *testing.T, testId string, beforeState map[string]*tfjson.State, afterState map[string]*tfjson.State) error {
+	}, func(t *testing.T, testId string, beforeState map[string]*tfjson.State, afterState map[string]*tfjson.State, afterHistory *history.StorageHistory) error {
 		assert.Equal(t, beforeState, afterState)
 		return nil
 	})
