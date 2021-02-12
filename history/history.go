@@ -19,6 +19,7 @@ type History interface {
 	InitializeHistory() (*StorageHistory, error)
 	StoreAppliedMigration(migration *AppliedStorageHistoryObject)
 	StoreFailedMigration(migration *FailedStorageHistoryObject)
+	RemoveAppliedMigration(migrationName string)
 	WriteToStorage() error
 	Cleanup()
 }

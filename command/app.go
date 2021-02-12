@@ -8,6 +8,7 @@ var version = "0.1.4"
 func GetApp() *cli.App {
 	var applyCommand = ApplyCommand{}
 	var planCommand = PlanCommand{}
+	var revertCommand = RevertCommand{}
 
 	return &cli.App{
 		Version: version,
@@ -33,6 +34,7 @@ func GetApp() *cli.App {
 		Commands: []*cli.Command{
 			applyCommand.GetCLICommand(),
 			planCommand.GetCLICommand(),
+			revertCommand.GetCLICommand(),
 		},
 	}
 }
