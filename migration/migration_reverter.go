@@ -82,7 +82,7 @@ func (r Reverter) revert(migration history.AppliedStorageHistoryObject) error {
 		fmt.Printf("\t- key: %s, version: %s\n", obj.Key, obj.ToVersionId)
 	}
 	fmt.Printf("Are you sure you would like to continue?\n")
-	if common.AskUserToConfirm() {
+	if !common.AskUserToConfirm() {
 		fmt.Printf("Cancelled by user, will not delete objects.\n")
 		os.Exit(0)
 	}

@@ -70,7 +70,7 @@ func (s S3State) ListAllObjects() ([]*s3.ObjectVersion, error) {
 
 	err := s.S3.ListObjectVersionsPages(&s3.ListObjectVersionsInput{
 		Bucket: aws.String(s.State.Bucket),
-		Prefix: aws.String(*s.State.Prefix),
+		Prefix: s.State.Prefix,
 	}, func(output *s3.ListObjectVersionsOutput, b bool) bool {
 		versions = append(versions, output.Versions...)
 		return output.NextKeyMarker != nil //Continue until no more pages
