@@ -26,6 +26,15 @@ func (h S3History) IsMigrationApplied(hash string) (bool, error) {
 	return false, nil
 }
 
+func (h S3History) ShouldMigrationBeApplied(migrationName string) (bool, error) {
+	for _, m := range h.StorageHistory.SkippedMigrations {
+		if m.Name == migrationName {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
 func (h *S3History) InitializeHistory() (*StorageHistory, error) {
 	historyPath := h.getHistoryStoragePath()
 	s3Path := "s3://" + filepath.Join(h.S3StorageConfig.Bucket, filepath.Dir(h.S3StorageConfig.Key))
@@ -49,6 +58,9 @@ func (h S3History) StoreAppliedMigration(migration *AppliedStorageHistoryObject)
 }
 func (h S3History) StoreFailedMigration(migration *FailedStorageHistoryObject) {
 	h.StorageHistory.storeFailedMigration(migration)
+}
+func (h S3History) StoreSkippedMigration(migration *SkippedStorageHistoryObject) {
+	h.StorageHistory.storeSkippedMigration(migration)
 }
 
 func (h S3History) RemoveAppliedMigration(migrationName string) {
