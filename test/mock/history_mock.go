@@ -48,6 +48,21 @@ func (mr *MockHistoryMockRecorder) IsMigrationApplied(hash interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsMigrationApplied", reflect.TypeOf((*MockHistory)(nil).IsMigrationApplied), hash)
 }
 
+// ShouldMigrationBeApplied mocks base method
+func (m *MockHistory) ShouldMigrationBeApplied(migrationName string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ShouldMigrationBeApplied", migrationName)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ShouldMigrationBeApplied indicates an expected call of ShouldMigrationBeApplied
+func (mr *MockHistoryMockRecorder) ShouldMigrationBeApplied(migrationName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShouldMigrationBeApplied", reflect.TypeOf((*MockHistory)(nil).ShouldMigrationBeApplied), migrationName)
+}
+
 // InitializeHistory mocks base method
 func (m *MockHistory) InitializeHistory() (*history.StorageHistory, error) {
 	m.ctrl.T.Helper()
@@ -73,6 +88,18 @@ func (m *MockHistory) StoreAppliedMigration(migration *history.AppliedStorageHis
 func (mr *MockHistoryMockRecorder) StoreAppliedMigration(migration interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreAppliedMigration", reflect.TypeOf((*MockHistory)(nil).StoreAppliedMigration), migration)
+}
+
+// StoreSkippedMigration mocks base method
+func (m *MockHistory) StoreSkippedMigration(migration *history.SkippedStorageHistoryObject) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StoreSkippedMigration", migration)
+}
+
+// StoreSkippedMigration indicates an expected call of StoreSkippedMigration
+func (mr *MockHistoryMockRecorder) StoreSkippedMigration(migration interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreSkippedMigration", reflect.TypeOf((*MockHistory)(nil).StoreSkippedMigration), migration)
 }
 
 // StoreFailedMigration mocks base method

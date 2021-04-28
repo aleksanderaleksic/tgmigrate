@@ -3,12 +3,13 @@ package command
 import "github.com/urfave/cli/v2"
 
 // Version is a version number.
-var version = "0.1.6"
+var version = "0.1.7"
 
 func GetApp() *cli.App {
 	var applyCommand = ApplyCommand{}
 	var planCommand = PlanCommand{}
 	var revertCommand = RevertCommand{}
+	var skipCommand = SkipCommand{}
 
 	return &cli.App{
 		Version: version,
@@ -35,6 +36,7 @@ func GetApp() *cli.App {
 			applyCommand.GetCLICommand(),
 			planCommand.GetCLICommand(),
 			revertCommand.GetCLICommand(),
+			skipCommand.GetCLICommand(),
 		},
 	}
 }

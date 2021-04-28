@@ -16,8 +16,10 @@ import (
 
 type History interface {
 	IsMigrationApplied(hash string) (bool, error)
+	ShouldMigrationBeApplied(migrationName string) (bool, error)
 	InitializeHistory() (*StorageHistory, error)
 	StoreAppliedMigration(migration *AppliedStorageHistoryObject)
+	StoreSkippedMigration(migration *SkippedStorageHistoryObject)
 	StoreFailedMigration(migration *FailedStorageHistoryObject)
 	RemoveAppliedMigration(migrationName string)
 	WriteToStorage() error
@@ -129,6 +131,10 @@ func (s *StorageHistory) storeAppliedMigration(migration *AppliedStorageHistoryO
 func (s *StorageHistory) storeFailedMigration(migration *FailedStorageHistoryObject) {
 	migration.Failed = common.JSONTime(time.Now())
 	s.FailedMigrations = append(s.FailedMigrations, *migration)
+}
+func (s *StorageHistory) storeSkippedMigration(migration *SkippedStorageHistoryObject) {
+	migration.Skipped = common.JSONTime(time.Now())
+	s.SkippedMigrations = append(s.SkippedMigrations, *migration)
 }
 
 func writeToStorage(historyPath string, storageHistory StorageHistory) error {

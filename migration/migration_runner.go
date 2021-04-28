@@ -138,12 +138,13 @@ func (r Runner) getMigrationsToBeApplied(migrationFiles []File, environment *str
 			continue
 		}
 
+		shouldBeApplied, _ := r.HistoryInterface.ShouldMigrationBeApplied(migration.Metadata.FileName)
 		isApplied, err := r.HistoryInterface.IsMigrationApplied(migration.Metadata.FileHash)
 		if err != nil {
 			return nil, err
 		}
 
-		if !isApplied {
+		if !isApplied && shouldBeApplied {
 			migrationsToBeApplied = append(migrationsToBeApplied, migration)
 		}
 	}
