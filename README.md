@@ -50,7 +50,7 @@ migration {
 }
 ```
 
-this file can be specified by using the `-c`(config) flag, </br> if not specified tgmigrate will look ub the parent
+this file can be specified by using the `-c`(config) flag, </br> if not specified tgmigrate will look in the parent
 folders up to `$HOME`
 
 `migration = "./migration"` refers to the directory where the migration files are located, this path is relative to the
@@ -64,9 +64,8 @@ populate the variables is described further down.
 
 ### Next you need to make a migration file:
 
-Under the migration directory you specified in the config file, create a new file and name it something that makes sense
-for you. I like to use today's data date + a short description, this makes sure the migration's comes in order by data,
-but it doesn't really matter.
+Under the migration directory you specified in the config file, create a new file and name it something like this: `V1__descriptive_text_of_the_migration.hcl`. <br>
+The `V1__` prefix is required and inspired by flyway's versioning concepts, and makes sure that the order of the migrations are executed correctly.
 
 Example migration file:
 
@@ -112,26 +111,28 @@ state file.
 
 ### Integrate with terragrunt:
 
-tgmigrate integrates well with terragrunt by using the before hook.</br>
+tgmigrate can be integrated with terragrunt's before hook. </br>
+There is currently a issue with the integration because there is no option to only run tgmigrate once, this makes terragrunt run tgmigrate for every module.</br>
+You can work around this issue by running it manually before running terragrunt apply or you can use the hook on a module that is always running first by using dependencies.
+
 
 ```hcl
-before_hook "dryrun_migrations" {
+before_hook "plan_migrations" {
   commands = [
     "plan"
   ]
   execute = [
     "tgmigrate",
-    "-d",
     "-y",
     "--cv=ACCOUNT_ID=${local.account_id};ASSUME_ROLE=${local.terraform_role_arn}",
-    "apply",
+    "plan",
     "prod"
   ]
   run_on_error = false
 }
 before_hook "run_migrations" {
   commands = [
-    "plan"
+    "apply"
   ]
   execute = [
     "tgmigrate",
